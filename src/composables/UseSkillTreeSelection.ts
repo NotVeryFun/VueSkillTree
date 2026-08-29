@@ -16,7 +16,10 @@ export function useSkillTreeSelection() {
         onEdgeClick,
         onPaneClick,
         onSelectionDragStop,
-        //getNodes
+        onSelectionEnd,
+        getNodes,
+        removeSelectedNodes,
+        
     } = useVueFlow()
 
     const {
@@ -31,12 +34,15 @@ export function useSkillTreeSelection() {
     const selectedEdges = ref<GraphEdge[]>([])
 
     const clearSelection = () => {
+
+        
         selectedNodes.value = []
         selectedEdges.value = []
     }
     onNodeClick(({ node }) => {
-    selectedNodes.value = [node]
-    selectedEdges.value = []
+        removeSelectedNodes(getNodes.value.filter((another_node) => node != another_node));
+        selectedNodes.value = [node]
+        selectedEdges.value = []
     })
 
     onEdgeClick(({ edge }) => {
@@ -50,6 +56,19 @@ export function useSkillTreeSelection() {
 
     onSelectionDragStop(( e : NodeDragEvent ) => {
         selectedNodes.value = e.nodes;
+        //console.log(selectedNodes.value)
+    })
+
+
+    const updateSelectedNodes = () => {
+        selectedNodes.value = getNodes.value.filter(
+            (node) => node.selected
+        )
+    }
+
+    onSelectionEnd((e : MouseEvent) => {
+        updateSelectedNodes();
+        //console.log("[UseSkillTreeSelection] onSelectionEnd!")
     })
 
 

@@ -1,4 +1,4 @@
-import { MarkerType, useVueFlow } from '@vue-flow/core'
+import { MarkerType, useVueFlow, type XYPosition } from '@vue-flow/core'
 
 export function useSkillTreeActions() {
   const {
@@ -6,7 +6,8 @@ export function useSkillTreeActions() {
     addNodes,
     addEdges,
     removeNodes,
-    removeEdges
+    removeEdges,
+    screenToFlowCoordinate
   } = useVueFlow()
 
   const addNodeFromHandle = ({
@@ -40,6 +41,9 @@ export function useSkillTreeActions() {
         data: {
           label: '新天賦節點',
           icon: 'axe.svg',
+          maxLevel: 1,
+          costPerLevel: 1,
+          
         },
       },
     ])
@@ -51,6 +55,29 @@ export function useSkillTreeActions() {
         target: id,
         type: 'floating',
         markerEnd: MarkerType.ArrowClosed,
+      },
+    ])
+  }
+
+  const addNodeByMousePosition = (e : MouseEvent) =>{
+    let ScreenX = e.clientX;
+    let ScreenY = e.clientY;
+    let flowPos : XYPosition = screenToFlowCoordinate({x : ScreenX , y : ScreenY});
+
+    const id = `node_${Date.now()}`
+
+    addNodes([
+      {
+        id,
+        type: 'custom',
+        position: flowPos,
+        data: {
+          label: '新天賦節點',
+          icon: 'axe.svg',
+          maxLevel: 1,
+          costPerLevel: 1,
+          
+        },
       },
     ])
   }
@@ -79,7 +106,8 @@ const deleteNodes = (nodeId: string[]) => {
     deleteNode,
     deleteEdge,
     deleteNodes , 
-    deleteEdges
+    deleteEdges,
+    addNodeByMousePosition
   }
 
 }

@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { ref, markRaw , onMounted, onUnmounted } from 'vue'
+import { ref, markRaw , onMounted, onUnmounted, computed } from 'vue'
 import {
   MarkerType,
   SelectionMode,
-  VueFlow
+  VueFlow,
+  
+  type GraphNode
 } from '@vue-flow/core'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import './style.css'
 
-import SkillNode from './components/SkillNode.vue'
+import SkillNode, { type SkillNodeShape } from './components/SkillNode.vue'
 import Navbar from './components/Navbar.vue'
 import Sidebar from './components/Sidebar.vue'
 import FloatingEdge from './components/FloatingEdge.vue'
+import SkillNodeTooltip from './components/SkillNodeTooltip.vue'
 
 import {
   initialNodes,
@@ -25,6 +28,7 @@ import { useSkillTreeIO } from './composables/UseSkillTreeIO'
 import { useSkillTreeSidebar } from './composables/UseSkillTreeSidebar'
 import { useSkillIcons } from './composables/UseSkillIcons'
 import {useSkillTreeSelection} from './composables/UseSkillTreeSelection'
+import type { SkillNodeData } from './type/SkillNode.ts'
 
 
 const nodes = ref(initialNodes)
@@ -45,7 +49,8 @@ const {
 const {
   addNodeFromHandle,
   deleteNode,
-  deleteEdge
+  deleteEdge,
+  addNodeByMousePosition
 } = useSkillTreeActions()
 
 const {
@@ -70,8 +75,72 @@ const {
   selectedNodes,
   selectedEdges,
   clearSelection,
-  handleKeyDown
+  handleKeyDown,
 } = useSkillTreeSelection()
+
+const tooltip = ref<SkillTooltipState>({
+  visible: false,
+  x: 0,
+  y: 0,
+  node: null,
+})
+
+
+interface SkillTooltipData {
+  id: string
+  label?: string
+  description?: string
+  icon?: string
+  backgroundColor?: string
+  shape?: SkillNodeShape
+  maxLevel?: number
+  costPerLevel?: number
+  currentLevel?: number
+}
+
+interface SkillTooltipState {
+  visible: boolean
+  x: number
+  y: number
+  node: SkillTooltipData | null
+}
+
+const handleNodeHover = (payload: {
+  nodeId: string
+  event: PointerEvent
+}) => {
+  const { nodeId, event } = payload
+
+  const node = nodes.value.find(
+    node => node.id === nodeId
+  ) 
+
+  if (!node) {
+    return
+  }
+
+  tooltip.value = {
+    visible: true,
+    x: event.clientX + 15,
+    y: event.clientY + 15,
+
+    node: {
+      id: node.id,
+      label: node.data.label,
+      description: node.data.description,
+      icon: node.data.icon,
+      backgroundColor: node.data.backgroundColor,
+      shape: node.data.shape,
+      maxLevel: node.data.maxLevel,
+      costPerLevel: node.data.costPerLevel,
+      currentLevel: node.data.currentLevel,
+    },
+  }
+}
+
+const handleNodeLeave = () => {
+  tooltip.value.visible = false
+}
 
 const presetColors = [
   '#ef4444',
@@ -95,6 +164,10 @@ onMounted(() => {
         'keydown',
         handleKeyDown
     )
+    window.addEventListener(
+      'dblclick',
+      handleDoubleClick
+    )
 })
 
 onUnmounted(() => {
@@ -102,7 +175,57 @@ onUnmounted(() => {
         'keydown',
         handleKeyDown
     )
+    window.removeEventListener(
+      'dblclick',
+      handleDoubleClick
+    )
 })
+
+
+
+const updateSelectedNodes = (
+  property: keyof SkillNodeData,
+  value: string
+) => {
+  selectedNodes.value.forEach(node => {
+    node.data[property] = value as never
+  })
+}
+
+const shapeOptions = [
+  {
+    value: 'rounded-rectangle',
+    label: '圓角矩形',
+  },
+  {
+    value: 'square',
+    label: '正方形',
+  },
+  {
+    value: 'circle',
+    label: '圓形',
+  },
+] satisfies {
+  value: SkillNodeShape
+  label: string
+}[]
+
+
+
+const flowContainer = ref<HTMLElement | null>(null)
+
+const handleDoubleClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+
+  // 只允許空白 Pane
+  if (!target.closest('.vue-flow__pane')) {
+    return
+  }
+
+  addNodeByMousePosition(event)
+}
+
+
 </script>
 
 <template>
@@ -116,42 +239,59 @@ onUnmounted(() => {
 
     <Sidebar
       :is-open="isSidebarOpen"
-      :node="selectedNode"
+      :nodes="selectedNodes"
+      :selected-nodes="selectedNodes"
       :icon-options="iconOptions"
       :preset-colors="presetColors"
       :icon-url-map="iconUrlMap"
+      :shape-options="shapeOptions"
       @close="closeSidebar"
+      @update-property = "updateSelectedNodes"
     />
+    <div ref="flowContainer" class="w-full h-full">
+      <VueFlow
+        v-model:nodes="nodes"
+        v-model:edges="edges"
+        :node-types="nodeTypes"
+        :edge-types="edgeTypes"
+        :default-edge-options="{
+          type: 'floating',
+          markerEnd: MarkerType.ArrowClosed
+        }"
+        fit-view-on-init
+        class="w-full h-full"
 
-    <VueFlow
-      v-model:nodes="nodes"
-      v-model:edges="edges"
-      :node-types="nodeTypes"
-      :edge-types="edgeTypes"
-      :default-edge-options="{
-        type: 'floating',
-        markerEnd: MarkerType.ArrowClosed
-      }"
-      fit-view-on-init
-      class="w-full h-full"
 
+        :pan-on-drag="[1]"
+        :selection-mode="SelectionMode.Partial"
+        :selection-on-drag="false"
+        :selection-key-code="true"
 
-      :pan-on-drag="[1]"
-      :selection-mode="SelectionMode.Partial"
-      :selection-on-drag="false"
-      :selection-key-code="true"
+        :nodes-selection-active="false"
 
-      :nodes-selection-active="false"
-      
-    >
-      <template #node-custom="nodeProps">
-        <SkillNode
-          v-bind="nodeProps"
-          @add-node-from-handle="addNodeFromHandle"
-          @start-skill-connection="startSkillConnection"
-        />
-      </template>
-    </VueFlow>
+        :zoom-on-double-click="false"
+      >
+        <template #node-custom="nodeProps">
+          <SkillNode
+            v-bind="nodeProps"
+            @add-node-from-handle="addNodeFromHandle"
+            @start-skill-connection="startSkillConnection"
+            @hover="handleNodeHover"
+            @leave="handleNodeLeave"
+          />
+        </template>
+      </VueFlow>
+      <SkillNodeTooltip
+        :visible="tooltip.visible"
+        :x="tooltip.x"
+        :y="tooltip.y"
+        :label="tooltip.node?.label"
+        :description="tooltip.node?.description"
+        :cost-per-level="tooltip.node?.costPerLevel"
+        :max-level="tooltip.node?.maxLevel"
+        :current-level="tooltip.node?.currentLevel"
+      />
+    </div>
 
   </div>
 </template>

@@ -1,19 +1,18 @@
 ```vue
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import '@vue-flow/node-resizer/dist/style.css'
+import type { SkillNodeData } from '../type/SkillNode'
 
-interface SkillNodeCustomData {
-  label: string
-  icon?: string
-  backgroundColor?: string
-  maxLevel: number
-  costPerLevel: number
-}
+export type SkillNodeShape =
+  | 'square'
+  | 'circle'
+  | 'rounded-rectangle'
 
-const props = defineProps<NodeProps<SkillNodeCustomData>>()
+
+const props = defineProps<NodeProps<SkillNodeData>>()
 
 const emit = defineEmits<{
   (
@@ -30,6 +29,19 @@ const emit = defineEmits<{
       sourceId: string
       event: PointerEvent
     }
+  ): void
+
+
+  (
+    e: 'hover',
+    payload: {
+      nodeId: string
+      event: PointerEvent
+    }
+  ): void
+
+  (
+    e: 'leave'
   ): void
 }>()
 
@@ -138,6 +150,21 @@ const getIconSrc = (iconName?: string) => {
 
   return `/SkillIcon/_1_Game/${iconName}`
 }
+
+const shapeClass = computed(() => {
+  switch (props.data.shape) {
+    case 'circle':
+      return 'rounded-full'
+
+    case 'square':
+      return 'rounded-none'
+
+    case 'rounded-rectangle':
+    default:
+      return 'rounded-xl'
+  }
+})
+
 </script>
 
 <template>
@@ -157,7 +184,7 @@ const getIconSrc = (iconName?: string) => {
     <NodeResizer
       :is-resizable="selected"
       :min-width="100"
-      :min-height="80"
+      :min-height="100"
       :line-style="selected ? { border: '10px solid transparent' } : { display: 'none' }"
       :handle-style="selected ? {
         width: '12px',
@@ -171,9 +198,27 @@ const getIconSrc = (iconName?: string) => {
     />
 
     <div
-        class="relative w-full h-full flex flex-col items-center justify-center p-3 bg-teal-800 text-white rounded-xl transition-colors min-w-[80px] min-h-[80px] box-border"
-        :style="{ backgroundColor: data.backgroundColor }"
-        >
+      class="relative w-full h-full flex flex-col items-center justify-center p-3 bg-teal-800 text-white transition-colors min-w-[80px] min-h-[80px] box-border
+      
+      
+      
+      "
+      :class="shapeClass"
+      :style="{ backgroundColor: data.backgroundColor }
+      
+      
+      "
+
+      @pointerenter="emit('hover', {
+          nodeId: props.id,
+          event: $event
+        })"
+        @pointermove="emit('hover', {
+          nodeId: props.id,
+          event: $event
+        })"
+        @pointerleave="emit('leave')"
+    >
         <!-- ========================================================= -->
         <!-- 整個 Node 都是 Target -->
         <!-- ========================================================= -->
@@ -196,30 +241,39 @@ const getIconSrc = (iconName?: string) => {
         <!-- ========================================================= -->
         <!-- Node 內容 -->
         <!-- ========================================================= -->
-        <div class="relative z-10 w-full h-full flex flex-col items-center justify-center">
+        <div class="relative z-10 w-full h-full flex flex-col items-center justify-center"
+        
+        
+        >
 
             <!-- 白色虛線選取框 -->
             <div
             v-if="selected"
-            class="absolute inset-[-15px] border border-dashed border-white pointer-events-none rounded-[16px] z-10"
+            class="absolute inset-[-15px] border border-dashed border-white pointer-events-none z-10"
             />
 
-            <!-- SVG Icon -->
-            <div class="w-10 h-10 flex items-center justify-center rounded-lg p-1.5">
-            <img
-                v-if="data.icon"
-                :src="getIconSrc(data.icon)"
-                :alt="data.label"
-                class="w-full h-full object-contain filter brightness-0 invert drop-shadow"
-            />
+              <div
+                class="w-[50%] aspect-square
+                      min-w-[40px]
+                      max-w-[100px]
+                      flex items-center justify-center
+                      "
+              >
+                <img
+                  v-if="data.icon"
+                  :src="getIconSrc(data.icon)"
+                  :alt="data.label"
+                  class="w-full h-full object-contain
+                        filter brightness-0 invert drop-shadow"
+                />
 
-            <span
-                v-else
-                class="text-xs text-slate-500"
-            >
-                無圖示
-            </span>
-            </div>
+                <span
+                  v-else
+                  class="text-xs text-slate-500"
+                >
+                  無圖示
+                </span>
+              </div>
 
             <!-- Label -->
             <div
@@ -268,10 +322,88 @@ const getIconSrc = (iconName?: string) => {
         </template>
 
         </div>
-        <div v-if="data.maxLevel > 1" class="absolute -bottom-5 z-20 items-center justify-center px-5 py-1 bg-slate-950/60 border border-slate-300/60 rounded-full shadow-md pointer-events-none select-none">
-            <span class="text-[14px] font-mono font-bold flex items-center justify-center text-slate-100 leading-none tracking-tight">
-                0/{{ data.maxLevel ?? 1 }}
-            </span>
+        <!-- ========================================================= -->
+        <!-- 技能資訊 -->
+        <!-- ========================================================= -->
+
+        <!-- 技能點消耗：左下 -->
+        <div
+          v-if="data.costPerLevel !== undefined"
+          class="
+            absolute
+            -bottom-5
+            left-1
+            z-20
+
+            px-3
+            py-1
+
+            flex
+            bg-yellow-800
+
+            bg-slate-950/60
+            border
+            border-slate-300/60
+            rounded-full
+            shadow-md
+
+            pointer-events-none
+            select-none
+          "
+        >
+          <span
+            class="
+              text-[13px]
+              font-mono
+              font-bold
+              text-slate-100
+              leading-none
+              tracking-tight
+              whitespace-nowrap
+            "
+          >
+            {{ data.costPerLevel }}
+          </span>
+        </div>
+
+
+        <!-- 最大 Level：右下 -->
+        <div
+          v-if="data.maxLevel > 1"
+          class="
+            absolute
+            -bottom-5
+            right-1
+            z-20
+
+            px-3
+            py-1
+
+            flex
+
+            bg-slate-950/60
+            border
+            border-slate-300/60
+            rounded-full
+            shadow-md
+
+            pointer-events-none
+            select-none
+          "
+        >
+          <span
+            class="
+              text-[13px]
+              font-mono
+              font-bold
+              text-slate-100
+              leading-none
+              tracking-tight
+              whitespace-nowrap
+            "
+          >
+            0/{{ data.maxLevel }}
+          </span>
         </div>
     </div>
 </template>

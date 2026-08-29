@@ -1,5 +1,4 @@
 import type { Node, Edge } from '@vue-flow/core'
-
 export const initialNodes: Node[] = [
   {
     id: '1',
@@ -8,16 +7,22 @@ export const initialNodes: Node[] = [
     data: {
       label: '核心天賦：基礎體魄',
       icon: 'axe.svg',
+      shape: 'rounded-rectangle',
+
       maxLevel: 2,
+      
     },
   },
   {
     id: '2',
     type: 'custom',
     position: { x: 100, y: 200 },
+    width: '100px',
+    height: '100px',
     data: {
       label: '分支 A：力量狂暴',
       icon: 'axe.svg',
+      shape: 'circle',
     },
   },
   {
@@ -27,7 +32,9 @@ export const initialNodes: Node[] = [
     data: {
       label: '分支 B：疾風步',
       icon: 'axe.svg',
+      shape: 'square',
     },
+    
   },
 ]
 
