@@ -1,6 +1,5 @@
 ```vue
 <script setup lang="ts">
-import type { GraphNode } from '@vue-flow/core'
 import type { SkillNodeShape } from './SkillNode.vue'
 import { computed, ref } from 'vue'
 import type { SkillGraphNode, SkillNodeData } from '../type/SkillNode.ts'
@@ -25,7 +24,17 @@ const props = defineProps<SidebarProps>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-  (e: 'update-property', property: keyof SkillNodeData, value: string): void
+
+  (
+    e: 'update-property',
+    property: keyof SkillNodeData,
+    value: string
+  ): void
+
+  (
+    e: 'update-node-id',
+    nodeId: string,
+  ): void
 }>()
 
 const getIconUrl = (iconName: string) => {
@@ -123,13 +132,15 @@ const currentShape = computed(() => {
 })
 
 const activeTab = ref<'properties' | 'style'>('properties')
+
+
 </script>
 
 <template>
   <div
     class="absolute top-14 left-0 h-[calc(100%-3.5rem)] w-80
            bg-slate-800 border-r border-slate-700 shadow-2xl
-           z-20 transition-transform duration-300 ease-in-out
+           z-20 transition-transform duration-0 ease-in-out
            p-5 flex flex-col text-slate-100"
     :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
   >
@@ -212,30 +223,33 @@ const activeTab = ref<'properties' | 'style'>('properties')
       <div>
         <label
           class="text-xs font-semibold text-slate-400
-                 uppercase tracking-wider block mb-1"
+                uppercase tracking-wider block mb-1"
         >
           Node ID
         </label>
 
-        <!-- 單選才顯示 ID -->
-        <div
-          v-if="isSingleNode()"
-          class="px-3 py-2 bg-slate-900 rounded
-                 border border-slate-700 text-sm
-                 font-mono text-emerald-400"
-        >
-          {{ nodes[0].id }}
-        </div>
-
-        <!-- 多選 -->
-        <div
-          v-else
-          class="px-3 py-2 bg-slate-900 rounded
-                 border border-slate-700 text-sm
-                 text-slate-500"
-        >
-          {{ nodes.length }} 個 Node 已選取
-        </div>
+        <input
+          :value="nodes.length === 1 ? nodes[0].id : ''"
+          @change="
+            emit(
+              'update-node-id',
+              ($event.target as HTMLInputElement).value
+            )
+          "
+          type="text"
+          :disabled="nodes.length !== 1"
+          :placeholder="
+            nodes.length > 1
+              ? '多選時無法修改 Node ID'
+              : '例如：fireball'
+          "
+          class="w-full px-3 py-2 bg-slate-900 rounded
+                border border-slate-700 text-slate-100
+                font-mono text-sm
+                focus:outline-none focus:border-emerald-500
+                disabled:opacity-50
+                disabled:cursor-not-allowed"
+        />
       </div>
 
       <!-- ========================= -->
@@ -408,7 +422,9 @@ const activeTab = ref<'properties' | 'style'>('properties')
         <div
           class="grid grid-cols-5 gap-2 max-h-48
                  overflow-y-auto p-1 bg-slate-900/50
-                 rounded border border-slate-700"
+                 rounded border border-slate-700
+                 
+                 "
         >
           <button
             v-for="iconName in iconOptions"
@@ -417,7 +433,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
             class="p-2 bg-slate-700 hover:bg-emerald-600
                    rounded transition flex items-center
                    justify-center border border-slate-600
-                   aspect-square"
+                   aspect-square "
             :class="{
               '!bg-emerald-600 !border-emerald-400':
                 iconValue() === iconName
@@ -427,7 +443,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
             <img
               :src="getIconUrl(iconName)"
               :alt="iconName"
-              class="w-6 h-6 object-contain pointer-events-none"
+              class="w-6 h-6 object-contain pointer-events-none brightness-0 invert"
             />
           </button>
         </div>

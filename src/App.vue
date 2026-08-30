@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref, markRaw , onMounted, onUnmounted, computed } from 'vue'
+import { ref, markRaw , onMounted, onUnmounted } from 'vue'
 import {
   MarkerType,
   SelectionMode,
-  VueFlow,
-  
-  type GraphNode
-} from '@vue-flow/core'
+  useVueFlow,
+  VueFlow} from '@vue-flow/core'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import './style.css'
@@ -48,19 +46,18 @@ const {
 
 const {
   addNodeFromHandle,
-  deleteNode,
-  deleteEdge,
   addNodeByMousePosition
+  ,
 } = useSkillTreeActions()
 
 const {
   exportToJson,
   importFromJson,
+  exportGameData
 } = useSkillTreeIO()
 
 const {
   isOpen: isSidebarOpen,
-  selectedNode,
   close: closeSidebar,
   toggle: toggleSidebar,
 } = useSkillTreeSidebar()
@@ -73,10 +70,13 @@ const {
 
 const {
   selectedNodes,
-  selectedEdges,
-  clearSelection,
   handleKeyDown,
 } = useSkillTreeSelection()
+
+const {
+    getIntersectingNodes,
+    screenToFlowCoordinate
+  } = useVueFlow()
 
 const tooltip = ref<SkillTooltipState>({
   visible: false,
@@ -84,6 +84,7 @@ const tooltip = ref<SkillTooltipState>({
   y: 0,
   node: null,
 })
+
 
 
 interface SkillTooltipData {
@@ -112,7 +113,7 @@ const handleNodeHover = (payload: {
   const { nodeId, event } = payload
 
   const node = nodes.value.find(
-    node => node.id === nodeId
+    (node: { id: string }) => node.id === nodeId
   ) 
 
   if (!node) {
@@ -212,20 +213,51 @@ const shapeOptions = [
 
 
 
-const flowContainer = ref<HTMLElement | null>(null)
 
 const handleDoubleClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement
 
+  let coords = screenToFlowCoordinate({x : event.clientX , y : event.clientY})
+
   // 只允許空白 Pane
-  if (!target.closest('.vue-flow__pane')) {
+  if (!target.closest('.vue-flow__pane') || getIntersectingNodes({
+    x : coords.x,
+    y : coords.y,
+    width : 1,
+    height : 1
+  }).length >= 1) {
     return
   }
 
   addNodeByMousePosition(event)
 }
 
+const updateNodeId = (newId: string) => {
+  const trimmedId = newId.trim()
 
+  if (!trimmedId) {
+    return
+  }
+
+  const selectedIds = new Set(
+    selectedNodes.value.map(node => node.id)
+  )
+
+  const duplicated = nodes.value.some(
+    node =>
+      node.id === trimmedId &&
+      !selectedIds.has(node.id)
+  )
+
+  if (duplicated) {
+    alert(`Node ID「${trimmedId}」已經存在。`)
+    return
+  }
+
+  selectedNodes.value.forEach(node => {
+    node.id = trimmedId
+  })
+}
 </script>
 
 <template>
@@ -234,6 +266,7 @@ const handleDoubleClick = (event: MouseEvent) => {
     <Navbar
       @toggle-sidebar="toggleSidebar"
       @export-json="exportToJson"
+      @export-game-data="exportGameData"
       @import-json="importFromJson"
     />
 
@@ -247,6 +280,8 @@ const handleDoubleClick = (event: MouseEvent) => {
       :shape-options="shapeOptions"
       @close="closeSidebar"
       @update-property = "updateSelectedNodes"
+      @update-node-id="updateNodeId"
+      
     />
     <div ref="flowContainer" class="w-full h-full">
       <VueFlow
@@ -267,7 +302,9 @@ const handleDoubleClick = (event: MouseEvent) => {
         :selection-on-drag="false"
         :selection-key-code="true"
 
-        :nodes-selection-active="false"
+        :multi-selection-key-code="'Shift'"
+
+        
 
         :zoom-on-double-click="false"
       >

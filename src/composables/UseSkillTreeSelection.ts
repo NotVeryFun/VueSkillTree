@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+
 import {
   useVueFlow,
   type GraphNode,
@@ -7,119 +8,248 @@ import {
 } from '@vue-flow/core'
 
 import { useSkillTreeActions } from './UseSkillTreeActions'
-
+import type { SkillNodeData } from '../type/SkillNode'
 
 
 export function useSkillTreeSelection() {
-    const {
-        onNodeClick,
-        onEdgeClick,
-        onPaneClick,
-        onSelectionDragStop,
-        onSelectionEnd,
-        getNodes,
-        removeSelectedNodes,
-        
-    } = useVueFlow()
+  const {
+    onNodeClick,
+    onEdgeClick,
+    onPaneClick,
+    onSelectionDragStop,
+    onSelectionEnd,
+    getNodes,
+    removeSelectedNodes
+  } = useVueFlow()
 
-    const {
-        //addNodeFromHandle,
-        //deleteNode,
-        //deleteEdge,
-        deleteNodes,
-        deleteEdges,
-    } = useSkillTreeActions();
+  const {
+    deleteNodes,
+    deleteEdges,
+    duplicateSelectedNodes,
+  } = useSkillTreeActions()
 
-    const selectedNodes = ref<GraphNode[]>([])
-    const selectedEdges = ref<GraphEdge[]>([])
+  const selectedNodes =
+    ref<GraphNode<SkillNodeData>[]>([])
 
-    const clearSelection = () => {
+  const selectedEdges =
+    ref<GraphEdge[]>([])
 
-        
-        selectedNodes.value = []
-        selectedEdges.value = []
-    }
-    onNodeClick(({ node }) => {
-        removeSelectedNodes(getNodes.value.filter((another_node) => node != another_node));
-        selectedNodes.value = [node]
-        selectedEdges.value = []
-    })
+  // ============================================================
+  // 清除選取
+  // ============================================================
 
-    onEdgeClick(({ edge }) => {
-    selectedNodes.value = []
-    selectedEdges.value = [edge]
-    })
+  const clearSelection = () => {
 
-    onPaneClick(() => {
-    clearSelection()
-    })
-
-    onSelectionDragStop(( e : NodeDragEvent ) => {
-        selectedNodes.value = e.nodes;
-        //console.log(selectedNodes.value)
-    })
-
-
-    const updateSelectedNodes = () => {
-        selectedNodes.value = getNodes.value.filter(
-            (node) => node.selected
+    removeSelectedNodes(
+        getNodes.value.filter(
+        node => node.selected
         )
+    )
+
+    selectedNodes.value = []
+    selectedEdges.value = []
     }
 
-    onSelectionEnd((e : MouseEvent) => {
-        updateSelectedNodes();
-        //console.log("[UseSkillTreeSelection] onSelectionEnd!")
+  // ============================================================
+  // 點擊 Node
+  // ============================================================
+
+ onNodeClick(({ node }) => {
+  console.log('[Selection] Node Click:', node.id)
+
+  // 等 Vue Flow 更新 selected 狀態
+  requestAnimationFrame(() => {
+    updateSelectedNodes()
+
+    console.log(
+      '[Selection] FINAL:',
+      selectedNodes.value.map(node => node.id)
+    )
+  })
+
+  selectedEdges.value = []
+})
+
+  // ============================================================
+  // 點擊 Edge
+  // ============================================================
+
+  onEdgeClick(({ edge }) => {
+
+    clearSelection()
+
+    selectedEdges.value = [edge]
+
+    })
+  // ============================================================
+  // 點擊 Pane
+  // ============================================================
+
+  onPaneClick(() => {
+    clearSelection()
+  })
+
+  // ============================================================
+  // 框選結束 / Drag Stop
+  // ============================================================
+
+  onSelectionDragStop(
+    (e: NodeDragEvent) => {
+      selectedNodes.value =
+        e.nodes as GraphNode<SkillNodeData>[]
+
+      selectedEdges.value = []
+    }
+  )
+
+  // ============================================================
+  // 更新目前被選取的 Node
+  // ============================================================
+
+  const updateSelectedNodes = () => {
+
+    selectedNodes.value = getNodes.value.filter(
+        (node) => node.selected
+    )
+
+    console.log(
+        '[Selection] Sync:',
+        selectedNodes.value.map(node => node.id)
+    )
+}
+
+  onSelectionEnd(
+    (_e: globalThis.MouseEvent) => {
+      updateSelectedNodes()
+    }
+  )
+
+  // ============================================================
+  // Ctrl + D
+  // ============================================================
+
+  const duplicateSelected = () => {
+    if (selectedNodes.value.length === 0) {
+      return
+    }
+
+    let newNodes = duplicateSelectedNodes()
+    console.log("[duplicateSelected]")
+    console.log(selectedNodes)
+    // Vue Flow 更新 Node selection 後，
+    // 下一幀重新取得實際選取狀態
+    
+    requestAnimationFrame(() => {
+      updateSelectedNodes()
     })
 
+    
+    selectedNodes.value = newNodes
+    selectedEdges.value = []
+  }
 
-    const deleteSelected = () => {
-        if (selectedNodes.value.length > 0) {
-            const ids: string[] = selectedNodes.value.map(
-                (node: { id: string }) => node.id
-            )
+  // ============================================================
+  // Delete
+  // ============================================================
 
-            deleteNodes(ids)
-            clearSelection()
-        }
+  const deleteSelected = () => {
+    if (selectedNodes.value.length > 0) {
+      const ids = selectedNodes.value.map(
+        node => node.id
+      )
+      console.log(ids)
 
-        if (selectedEdges.value.length > 0) {
-            const ids: string[] = selectedEdges.value.map(
-                (edge : {id : string}) => edge.id
-            )
+      deleteNodes(ids)
 
-            deleteEdges(ids)
-            clearSelection()
-        }
+      clearSelection()
     }
 
+    if (selectedEdges.value.length > 0) {
+      const ids = selectedEdges.value.map(
+        edge => edge.id
+      )
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-        if (
-            event.key !== 'Delete' &&
-            event.key !== 'Backspace'
+      deleteEdges(ids)
+
+      clearSelection()
+    }
+  }
+
+  // ============================================================
+  // Keyboard
+  // ============================================================
+
+  const handleKeyDown = (
+    event: KeyboardEvent
+  ) => {
+
+    // ============================================================
+    // 正在輸入文字時，不處理快捷鍵
+    // ============================================================
+
+    if (
+        event.ctrlKey &&
+        event.key.toLowerCase() === 'd'
         ) {
-            return
+        event.preventDefault()
+
+        console.log(
+            '[Ctrl+D] selectedNodes:',
+            selectedNodes.value.map(node => node.id)
+        )
+
+        console.log(
+            '[Ctrl+D] selectedNodes count:',
+            selectedNodes.value.length
+        )
+
+            duplicateSelected()
         }
 
-        const target = event.target as HTMLElement | null
+    // ============================================================
+    // Delete / Backspace
+    // ============================================================
 
-        // 避免正在輸入文字時觸發刪除 Node
-        if (
-            target instanceof HTMLInputElement ||
-            target instanceof HTMLTextAreaElement ||
-            target instanceof HTMLSelectElement ||
-            target?.isContentEditable
-        ) {
-            return
-        }
-
-        deleteSelected()
+    if (
+      event.key !== 'Delete' &&
+      event.key !== 'Backspace'
+    ) {
+      return
     }
 
-return {
+    event.preventDefault()
+
+    deleteSelected()
+  }
+
+  // ============================================================
+  // 外部設定選取 Node
+  // ============================================================
+
+  const setSelectedNodes = (
+    nodes: (
+      GraphNode<SkillNodeData> | null
+    )[]
+  ) => {
+    selectedNodes.value =
+      nodes.filter(
+        (
+          node
+        ): node is GraphNode<SkillNodeData> =>
+          node !== null
+      )
+  }
+
+  return {
     selectedNodes,
     selectedEdges,
+
     clearSelection,
-    handleKeyDown
+
+    handleKeyDown,
+
+    setSelectedNodes,
+
+    duplicateSelected,
   }
 }

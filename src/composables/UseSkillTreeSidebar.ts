@@ -1,14 +1,12 @@
 import { ref } from 'vue'
-import { useVueFlow, type GraphNode } from '@vue-flow/core'
+import { useVueFlow } from '@vue-flow/core'
 
 export function useSkillTreeSidebar() {
   const { onNodeClick } = useVueFlow()
 
   const isOpen = ref(false)
-  const selectedNode = ref<GraphNode | null>(null)
 
-  onNodeClick(({ node }) => {
-    selectedNode.value = node
+  onNodeClick(() => {
     isOpen.value = true
   })
 
@@ -22,7 +20,6 @@ export function useSkillTreeSidebar() {
 
   return {
     isOpen,
-    selectedNode,
     close,
     toggle,
   }

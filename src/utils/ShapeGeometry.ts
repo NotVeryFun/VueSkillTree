@@ -187,7 +187,7 @@ function getRoundedRectangleBoundaryPoint(
     dy * dy
 
   const b =
-    2 *
+    -2 *
     (
       dx * cornerCenterX +
       dy * cornerCenterY
