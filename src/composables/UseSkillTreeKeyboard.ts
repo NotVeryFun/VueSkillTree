@@ -17,7 +17,14 @@ export function useSkillTreeKeyboard({
     // ============================================================
 
     const target = event.target as HTMLElement | null
+    console.log("[handleKeyDown] event.ctrlKey")
+    console.log(event.ctrlKey)
 
+    console.log("[handleKeyDown] event.shiftKey")
+    console.log(event.shiftKey)
+
+    console.log("[handleKeyDown] event.key.toLowerCase()")
+    console.log(event.key.toLowerCase())
     if (
       target?.tagName === 'INPUT' ||
       target?.tagName === 'TEXTAREA' ||
@@ -67,7 +74,7 @@ export function useSkillTreeKeyboard({
     // ============================================================
 
     if (
-      event.ctrlKey &&
+      event.shiftKey &&
       event.key.toLowerCase() === 'd'
     ) {
       event.preventDefault()

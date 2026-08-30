@@ -242,7 +242,9 @@ const presetColors = [
 onMounted(() => {
     window.addEventListener(
         'keydown',
-        handleKeyDown
+        handleKeyDown,{
+  capture: true,
+}
     )
     window.addEventListener(
       'dblclick',
