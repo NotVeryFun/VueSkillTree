@@ -1,6 +1,9 @@
 import { MarkerType, Position, useVueFlow } from '@vue-flow/core'
 
-export function useSkillConnection() {
+export function useSkillConnection(
+  onBeforeAddEdge?: () => void
+
+) {
   const {
     addEdges,
     startConnection,
@@ -9,6 +12,8 @@ export function useSkillConnection() {
     getIntersectingNodes,
     screenToFlowCoordinate,
   } = useVueFlow()
+
+
 
   let connectionSourceId: string | null = null
   //let connectionPointerId: number | null = null
@@ -72,6 +77,8 @@ export function useSkillConnection() {
     if (!sourceId || !targetId) return
     if (sourceId === targetId) return
 
+
+    onBeforeAddEdge?.();
     addEdges([
       {
         id: `e-${sourceId}-${targetId}-${Date.now()}`,

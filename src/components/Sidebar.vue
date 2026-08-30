@@ -32,6 +32,12 @@ const emit = defineEmits<{
   ): void
 
   (
+    e: 'update-property-number',
+    property: keyof SkillNodeData,
+    value: number
+  ): void
+
+  (
     e: 'update-node-id',
     nodeId: string,
   ): void
@@ -87,6 +93,35 @@ const getCommonValue = (
     : ''
 }
 
+
+const getCommonNumberValue = (
+  property: keyof SkillNodeData
+): number | '' => {
+  if (props.nodes.length === 0) {
+    return ''
+  }
+
+  const values = props.nodes.map(
+    node => node.data[property]
+  )
+  // 所有 Node 都沒有值
+  if (values.every(value => value === undefined || value === null)) {
+    return 1
+  }
+
+  // 多個 Node，但值不同
+  const first = values[0]
+
+
+  if (values.some(value => value !== first)) {
+    return ''
+  }
+
+  return typeof first === 'number'
+    ? first
+    : ''
+}
+
 /**
  * 當 Sidebar 修改屬性
  *
@@ -98,6 +133,13 @@ const updateProperty = (
   value: string
 ) => {
   emit('update-property', property, value)
+}
+
+const updatePropertyNumber = (
+  property: keyof SkillNodeData,
+  value: number
+) => {
+  emit('update-property-number', property, value)
 }
 
 const labelValue = () => {
@@ -327,18 +369,18 @@ const activeTab = ref<'properties' | 'style'>('properties')
       </label>
 
       <input
-        :value="getCommonValue('costPerLevel')"
+        :value="getCommonNumberValue('costPerLevel')"
         @input="
-          updateProperty(
+          updatePropertyNumber(
             'costPerLevel',
-            ($event.target as HTMLInputElement).value
+            Number(($event.target as HTMLInputElement).value)
           )
         "
         type="number"
         min="0"
         step="1"
         :placeholder="
-          nodes.length > 1 && getCommonValue('costPerLevel') === ''
+          nodes.length > 1 && getCommonNumberValue('costPerLevel') === ''
             ? '多個 Node 的消耗不同'
             : '例如：1'
         "
@@ -363,18 +405,21 @@ const activeTab = ref<'properties' | 'style'>('properties')
       </label>
 
       <input
-        :value="getCommonValue('maxLevel')"
+        :value="getCommonNumberValue('maxLevel')"
         @input="
-          updateProperty(
+          updatePropertyNumber(
             'maxLevel',
-            ($event.target as HTMLInputElement).value
+            Math.max(
+              1,
+              Number(($event.target as HTMLInputElement).value) || 1
+            )
           )
         "
         type="number"
         min="1"
         step="1"
         :placeholder="
-          nodes.length > 1 && getCommonValue('maxLevel') === ''
+          nodes.length > 1 && getCommonNumberValue('maxLevel') === ''
             ? '多個 Node 的最大等級不同'
             : '例如：5'
         "

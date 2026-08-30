@@ -176,53 +176,6 @@ export function useSkillTreeSelection() {
   }
 
   // ============================================================
-  // Keyboard
-  // ============================================================
-
-  const handleKeyDown = (
-    event: KeyboardEvent
-  ) => {
-
-    // ============================================================
-    // 正在輸入文字時，不處理快捷鍵
-    // ============================================================
-
-    if (
-        event.ctrlKey &&
-        event.key.toLowerCase() === 'd'
-        ) {
-        event.preventDefault()
-
-        console.log(
-            '[Ctrl+D] selectedNodes:',
-            selectedNodes.value.map(node => node.id)
-        )
-
-        console.log(
-            '[Ctrl+D] selectedNodes count:',
-            selectedNodes.value.length
-        )
-
-            duplicateSelected()
-        }
-
-    // ============================================================
-    // Delete / Backspace
-    // ============================================================
-
-    if (
-      event.key !== 'Delete' &&
-      event.key !== 'Backspace'
-    ) {
-      return
-    }
-
-    event.preventDefault()
-
-    deleteSelected()
-  }
-
-  // ============================================================
   // 外部設定選取 Node
   // ============================================================
 
@@ -241,15 +194,14 @@ export function useSkillTreeSelection() {
   }
 
   return {
-    selectedNodes,
-    selectedEdges,
+  selectedNodes,
+  selectedEdges,
 
-    clearSelection,
+  clearSelection,
 
-    handleKeyDown,
+  setSelectedNodes,
 
-    setSelectedNodes,
-
-    duplicateSelected,
-  }
+  duplicateSelected,
+  deleteSelected,
+}
 }

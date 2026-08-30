@@ -4,7 +4,10 @@ import {
   type XYPosition,
 } from '@vue-flow/core'
 
-export function useSkillTreeActions() {
+export function useSkillTreeActions(
+  onBeforeChange?: () => void
+
+) {
   const {
     findNode,
     addNodes,
@@ -98,6 +101,8 @@ export function useSkillTreeActions() {
       x += offset
     }
 
+
+    onBeforeChange?.()
     const id = createNodeId()
 
     addNodes([
@@ -149,7 +154,7 @@ export function useSkillTreeActions() {
       })
 
     const id = createNodeId()
-
+    onBeforeChange?.()
     addNodes([
       {
         id,
@@ -164,6 +169,7 @@ export function useSkillTreeActions() {
 
           maxLevel: 1,
           costPerLevel: 1,
+          
         },
       },
     ])
@@ -247,6 +253,9 @@ export function useSkillTreeActions() {
     selected: false,
   }))
 
+
+
+  onBeforeChange?.()
   // 取消舊 Node
   setNodes(
     getNodes.value.map(node => ({

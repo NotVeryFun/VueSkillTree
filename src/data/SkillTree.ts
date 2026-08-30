@@ -3,36 +3,47 @@ export const initialNodes: Node[] = [
   {
     id: '1',
     type: 'custom',
-    position: { x: 250, y: 50 },
+    position: { x: 0, y: 0 },
+    width: '64px',
+    height: '64px',
     data: {
       label: '核心天賦：基礎體魄',
       icon: 'axe.svg',
       shape: 'rounded-rectangle',
 
       maxLevel: 2,
+      costPerLevel: 1
       
     },
   },
   {
     id: '2',
     type: 'custom',
-    position: { x: 100, y: 200 },
-    width: '100px',
-    height: '100px',
+    position: { x: 128, y: 128 },
+    width: '64px',
+    height: '64px',
     data: {
       label: '分支 A：力量狂暴',
       icon: 'axe.svg',
       shape: 'circle',
+
+      maxLevel: 1,
+      costPerLevel: 1
     },
   },
   {
     id: '3',
     type: 'custom',
-    position: { x: 400, y: 200 },
+    position: { x: -128, y: 128 },
+    width: '64px',
+    height: '64px',
     data: {
       label: '分支 B：疾風步',
       icon: 'axe.svg',
       shape: 'square',
+
+      maxLevel: 1,
+      costPerLevel: 1
     },
     
   },

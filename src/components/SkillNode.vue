@@ -183,8 +183,8 @@ const shapeClass = computed(() => {
         <!-- NodeResizer 調整大小控制元件 -->
     <NodeResizer
       :is-resizable="selected"
-      :min-width="100"
-      :min-height="100"
+      :min-width="128"
+      :min-height="128"
       :line-style="selected ? { border: '10px solid transparent' } : { display: 'none' }"
       :handle-style="selected ? {
         width: '12px',

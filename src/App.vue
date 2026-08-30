@@ -4,7 +4,11 @@ import {
   MarkerType,
   SelectionMode,
   useVueFlow,
-  VueFlow} from '@vue-flow/core'
+  VueFlow
+
+
+} from '@vue-flow/core'
+import { Background , BackgroundVariant} from '@vue-flow/background'
 import '@vue-flow/core/dist/style.css'
 import '@vue-flow/core/dist/theme-default.css'
 import './style.css'
@@ -28,6 +32,8 @@ import { useSkillIcons } from './composables/UseSkillIcons'
 import {useSkillTreeSelection} from './composables/UseSkillTreeSelection'
 import type { SkillNodeData } from './type/SkillNode.ts'
 
+import { useSkillTreeHistory } from './composables/UseSkillTreeHistory'
+import { useSkillTreeKeyboard } from './composables/UseSkillTreeKeyboard'
 
 const nodes = ref(initialNodes)
 const edges = ref(initialEdges)
@@ -41,14 +47,34 @@ const edgeTypes = {
 }
 
 const {
+  undo,
+  redo,
+  push,
+} = useSkillTreeHistory()
+
+
+
+let isRestoringHistory = false
+
+const saveHistory = () => {
+  if(isRestoringHistory){return;}
+    push(
+        nodes.value,
+        edges.value
+    )
+}
+
+
+const {
   start: startSkillConnection,
-} = useSkillConnection()
+  
+} = useSkillConnection(saveHistory)
 
 const {
   addNodeFromHandle,
   addNodeByMousePosition
   ,
-} = useSkillTreeActions()
+} = useSkillTreeActions(saveHistory)
 
 const {
   exportToJson,
@@ -70,8 +96,60 @@ const {
 
 const {
   selectedNodes,
-  handleKeyDown,
+  duplicateSelected,
+  deleteSelected,
 } = useSkillTreeSelection()
+
+
+
+
+const handleUndo = () => {
+
+  const snapshot = undo(
+    nodes.value,
+    edges.value
+  )
+
+  if (!snapshot) {
+    return
+  }
+
+  isRestoringHistory = true
+
+  nodes.value = snapshot.nodes
+  edges.value = snapshot.edges
+
+  isRestoringHistory = false
+}
+
+const handleRedo = () => {
+
+  const snapshot = redo(
+    nodes.value,
+    edges.value
+  )
+
+  if (!snapshot) {
+    return
+  }
+
+  isRestoringHistory = true
+
+  nodes.value = snapshot.nodes
+  edges.value = snapshot.edges
+
+  isRestoringHistory = false
+}
+
+const {
+  handleKeyDown,
+} = useSkillTreeKeyboard({
+  duplicateSelected,
+  deleteSelected,
+  undo: handleUndo,
+  redo: handleRedo,
+})
+
 
 const {
     getIntersectingNodes,
@@ -84,6 +162,7 @@ const tooltip = ref<SkillTooltipState>({
   y: 0,
   node: null,
 })
+
 
 
 
@@ -188,6 +267,17 @@ const updateSelectedNodes = (
   property: keyof SkillNodeData,
   value: string
 ) => {
+
+
+  selectedNodes.value.forEach(node => {
+    node.data[property] = value as never
+  })
+}
+
+const updateSelectedNodesNumberProperty = (
+  property: keyof SkillNodeData,
+  value: number
+) => {
   selectedNodes.value.forEach(node => {
     node.data[property] = value as never
   })
@@ -229,6 +319,8 @@ const handleDoubleClick = (event: MouseEvent) => {
     return
   }
 
+
+  saveHistory();
   addNodeByMousePosition(event)
 }
 
@@ -280,6 +372,7 @@ const updateNodeId = (newId: string) => {
       :shape-options="shapeOptions"
       @close="closeSidebar"
       @update-property = "updateSelectedNodes"
+      @update-property-number = "updateSelectedNodesNumberProperty"
       @update-node-id="updateNodeId"
       
     />
@@ -304,9 +397,13 @@ const updateNodeId = (newId: string) => {
 
         :multi-selection-key-code="'Shift'"
 
-        
+
 
         :zoom-on-double-click="false"
+
+
+        :snap-to-grid="true"
+        :snap-grid="[32, 32]"
       >
         <template #node-custom="nodeProps">
           <SkillNode
@@ -315,8 +412,15 @@ const updateNodeId = (newId: string) => {
             @start-skill-connection="startSkillConnection"
             @hover="handleNodeHover"
             @leave="handleNodeLeave"
+            
           />
         </template>
+        <Background 
+        :variant="BackgroundVariant.Dots"
+        :gap="64"
+        :size="5"
+        
+        />
       </VueFlow>
       <SkillNodeTooltip
         :visible="tooltip.visible"
@@ -324,6 +428,7 @@ const updateNodeId = (newId: string) => {
         :y="tooltip.y"
         :label="tooltip.node?.label"
         :description="tooltip.node?.description"
+
         :cost-per-level="tooltip.node?.costPerLevel"
         :max-level="tooltip.node?.maxLevel"
         :current-level="tooltip.node?.currentLevel"
