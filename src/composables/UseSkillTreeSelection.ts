@@ -61,10 +61,6 @@ export function useSkillTreeSelection() {
   requestAnimationFrame(() => {
     updateSelectedNodes()
 
-    console.log(
-      '[Selection] FINAL:',
-      selectedNodes.value.map(node => node.id)
-    )
   })
 
   selectedEdges.value = []
@@ -108,15 +104,18 @@ export function useSkillTreeSelection() {
 
   const updateSelectedNodes = () => {
 
-    selectedNodes.value = getNodes.value.filter(
-        (node) => node.selected
-    )
+    const nodes: GraphNode<any, any, string>[] = getNodes.value
 
-    console.log(
-        '[Selection] Sync:',
-        selectedNodes.value.map(node => node.id)
-    )
-}
+    const selected = []
+
+    for (const node of nodes) {
+        if (node.selected) {
+            selected.push(node)
+        }
+    }
+
+    selectedNodes.value = selected
+  }
 
   onSelectionEnd(
     (_e: globalThis.MouseEvent) => {
@@ -154,22 +153,28 @@ export function useSkillTreeSelection() {
 
   const deleteSelected = () => {
     if (selectedNodes.value.length > 0) {
-      const ids = selectedNodes.value.map(
-        node => node.id
-      )
-      console.log(ids)
+      const node_ids = []
 
-      deleteNodes(ids)
+      for(const n of selectedNodes.value){
+        node_ids.push(n.id)
+
+      }
+      console.log(node_ids)
+
+      deleteNodes(node_ids)
 
       clearSelection()
     }
 
     if (selectedEdges.value.length > 0) {
-      const ids = selectedEdges.value.map(
-        edge => edge.id
-      )
+      const edge_ids = []
 
-      deleteEdges(ids)
+      for(const e of selectedEdges.value){
+        edge_ids.push(e.id)
+
+      }
+
+      deleteEdges(edge_ids)
 
       clearSelection()
     }
@@ -184,13 +189,17 @@ export function useSkillTreeSelection() {
       GraphNode<SkillNodeData> | null
     )[]
   ) => {
-    selectedNodes.value =
-      nodes.filter(
-        (
-          node
-        ): node is GraphNode<SkillNodeData> =>
-          node !== null
-      )
+
+    const selected = []
+
+    for (const node of nodes) {
+        if (node !== null) {
+            selected.push(node)
+        }
+    }
+
+    selectedNodes.value = selected;
+      
   }
 
   return {
