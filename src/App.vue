@@ -98,6 +98,7 @@ const {
   selectedNodes,
   duplicateSelected,
   deleteSelected,
+  updateSelectionSelectedNodes
 } = useSkillTreeSelection()
 
 
@@ -218,6 +219,8 @@ const handleNodeHover = (payload: {
   }
 }
 
+
+
 const handleNodeLeave = () => {
   tooltip.value.visible = false
 }
@@ -309,7 +312,7 @@ const shapeOptions = [
 const handleDoubleClick = (event: MouseEvent) => {
   const target = event.target as HTMLElement
 
-  let coords = screenToFlowCoordinate({x : event.clientX , y : event.clientY})
+  const coords = screenToFlowCoordinate({x : event.clientX , y : event.clientY})
 
   // 只允許空白 Pane
   if (!target.closest('.vue-flow__pane') || getIntersectingNodes({
@@ -333,9 +336,12 @@ const updateNodeId = (newId: string) => {
     return
   }
 
-  const selectedIds = new Set(
-    selectedNodes.value.map(node => node.id)
-  )
+  const selectedIds =  new Set();
+
+
+  for(const node of selectedNodes.value){
+    selectedIds.add(node.id)
+  }
 
   const duplicated = nodes.value.some(
     node =>
@@ -389,15 +395,17 @@ const updateNodeId = (newId: string) => {
           markerEnd: MarkerType.ArrowClosed
         }"
         fit-view-on-init
+        
         class="w-full h-full"
 
-
         :pan-on-drag="[1]"
+
         :selection-mode="SelectionMode.Partial"
         :selection-on-drag="false"
         :selection-key-code="true"
 
-        :multi-selection-key-code="'Shift'"
+        :elements-selectable="false"
+        :nodes-focusable="false"
 
 
 
@@ -414,6 +422,7 @@ const updateNodeId = (newId: string) => {
             @start-skill-connection="startSkillConnection"
             @hover="handleNodeHover"
             @leave="handleNodeLeave"
+            @select="updateSelectionSelectedNodes"
             
           />
         </template>

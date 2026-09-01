@@ -3,10 +3,19 @@ import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite' // 1. Import the plugin
 // https://vite.dev/config/
 export default defineConfig({
+  esbuild: {
+    // Only removes console.log, preserving console.error, console.warn, etc.
+    exclude: ['console', 'debugger'],
+  },
+
   plugins: [
     vue(),
     tailwindcss()
   
   ],
-  base: '/VueSkillTree/'
+  base: '/VueSkillTree/',
+  server: {
+      port: 6538
+  },
+  
 })

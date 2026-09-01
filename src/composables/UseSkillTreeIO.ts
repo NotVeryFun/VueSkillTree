@@ -1,4 +1,5 @@
 import { useVueFlow, type GraphEdge, type GraphNode } from '@vue-flow/core'
+import type { SkillGraphNode } from '../type/SkillNode'
 
 interface SkillGameNode {
   id: string
@@ -65,8 +66,8 @@ export function useSkillTreeIO() {
 
   const importFromJson = (
     data: {
-      nodes: any[]
-      edges: any[]
+      nodes: GraphNode<SkillGraphNode>[]
+      edges: GraphEdge[]
     }
   ) => {
     setNodes(data.nodes)

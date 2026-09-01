@@ -29,8 +29,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
+
+      #把repo抓下來到Action的工作目錄
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

@@ -135,6 +135,7 @@ export function useSkillTreeActions(
         type: 'floating',
 
         markerEnd: MarkerType.ArrowClosed,
+        animated: true
       },
     ])
   }
@@ -251,6 +252,7 @@ export function useSkillTreeActions(
     target: idMap.get(edge.target)!,
 
     selected: false,
+    animated: true
   }))
 
 

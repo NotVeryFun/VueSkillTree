@@ -19,7 +19,7 @@ export const initialNodes: Node[] = [
   {
     id: '2',
     type: 'custom',
-    position: { x: 128, y: 128 },
+    position: { x: -256, y: -256 },
     width: '64px',
     height: '64px',
     data: {
@@ -34,7 +34,7 @@ export const initialNodes: Node[] = [
   {
     id: '3',
     type: 'custom',
-    position: { x: -128, y: 128 },
+    position: { x: 256, y: -256 },
     width: '64px',
     height: '64px',
     data: {
@@ -61,6 +61,7 @@ export const initialEdges: Edge[] = [
     id: 'e1-3',
     source: '1',
     target: '3',
+    animated: true,
     type: 'floating',
   },
 ]

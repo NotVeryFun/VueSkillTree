@@ -205,9 +205,9 @@ const activeTab = ref<'properties' | 'style'>('properties')
       </h2>
 
       <button
-        @click="emit('close')"
         class="text-slate-400 hover:text-white p-1
                rounded-md hover:bg-slate-700 transition"
+        @click="emit('close')"
       >
         ✕
       </button>
@@ -272,12 +272,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
         <input
           :value="nodes.length === 1 ? nodes[0].id : ''"
-          @change="
-            emit(
-              'update-node-id',
-              ($event.target as HTMLInputElement).value
-            )
-          "
           type="text"
           :disabled="nodes.length !== 1"
           :placeholder="
@@ -291,6 +285,12 @@ const activeTab = ref<'properties' | 'style'>('properties')
                 focus:outline-none focus:border-emerald-500
                 disabled:opacity-50
                 disabled:cursor-not-allowed"
+          @change="
+            emit(
+              'update-node-id',
+              ($event.target as HTMLInputElement).value
+            )
+          "
         />
       </div>
 
@@ -308,12 +308,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
         <input
           :value="labelValue()"
-          @input="
-            updateProperty(
-              'label',
-              ($event.target as HTMLInputElement).value
-            )
-          "
           type="text"
           :placeholder="
             nodes.length > 1 && labelValue() === ''
@@ -324,6 +318,12 @@ const activeTab = ref<'properties' | 'style'>('properties')
                  border border-slate-700 text-slate-100
                  focus:outline-none focus:border-emerald-500
                  text-sm"
+          @input="
+            updateProperty(
+              'label',
+              ($event.target as HTMLInputElement).value
+            )
+          "
         />
       </div>
       <div>
@@ -336,12 +336,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
       <textarea
         :value="getCommonValue('description')"
-        @input="
-          updateProperty(
-            'description',
-            ($event.target as HTMLTextAreaElement).value
-          )
-        "
         rows="4"
         :placeholder="
           nodes.length > 1 && getCommonValue('description') === ''
@@ -352,6 +346,12 @@ const activeTab = ref<'properties' | 'style'>('properties')
               border border-slate-700 text-slate-100
               focus:outline-none focus:border-emerald-500
               text-sm resize-none"
+        @input="
+          updateProperty(
+            'description',
+            ($event.target as HTMLTextAreaElement).value
+          )
+        "
       />
     </div>
 
@@ -370,12 +370,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
       <input
         :value="getCommonNumberValue('costPerLevel')"
-        @input="
-          updatePropertyNumber(
-            'costPerLevel',
-            Number(($event.target as HTMLInputElement).value)
-          )
-        "
         type="number"
         min="0"
         step="1"
@@ -388,6 +382,12 @@ const activeTab = ref<'properties' | 'style'>('properties')
               border border-slate-700 text-slate-100
               focus:outline-none focus:border-emerald-500
               text-sm"
+        @input="
+          updatePropertyNumber(
+            'costPerLevel',
+            Number(($event.target as HTMLInputElement).value)
+          )
+        "
       />
     </div>
 
@@ -406,15 +406,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
       <input
         :value="getCommonNumberValue('maxLevel')"
-        @input="
-          updatePropertyNumber(
-            'maxLevel',
-            Math.max(
-              1,
-              Number(($event.target as HTMLInputElement).value) || 1
-            )
-          )
-        "
         type="number"
         min="1"
         step="1"
@@ -427,6 +418,15 @@ const activeTab = ref<'properties' | 'style'>('properties')
               border border-slate-700 text-slate-100
               focus:outline-none focus:border-emerald-500
               text-sm"
+        @input="
+          updatePropertyNumber(
+            'maxLevel',
+            Math.max(
+              1,
+              Number(($event.target as HTMLInputElement).value) || 1
+            )
+          )
+        "
       />
     </div>
     </div>
@@ -449,18 +449,18 @@ const activeTab = ref<'properties' | 'style'>('properties')
 
         <input
           :value="iconValue()"
-          @input="
-            updateProperty(
-              'icon',
-              ($event.target as HTMLInputElement).value
-            )
-          "
           type="text"
           placeholder="例如: sword.svg"
           class="w-full px-3 py-2 bg-slate-900 rounded
                  border border-slate-700 text-slate-100
                  focus:outline-none focus:border-emerald-500
                  text-sm mb-3"
+          @input="
+            updateProperty(
+              'icon',
+              ($event.target as HTMLInputElement).value
+            )
+          "
         />
 
         <!-- Icon 選擇 -->
@@ -474,7 +474,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
           <button
             v-for="iconName in iconOptions"
             :key="iconName"
-            @click="updateProperty('icon', iconName)"
             class="p-2 bg-slate-700 hover:bg-emerald-600
                    rounded transition flex items-center
                    justify-center border border-slate-600
@@ -484,6 +483,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
                 iconValue() === iconName
             }"
             :title="iconName"
+            @click="updateProperty('icon', iconName)"
           >
             <img
               :src="getIconUrl(iconName)"
@@ -517,7 +517,6 @@ const activeTab = ref<'properties' | 'style'>('properties')
             v-for="shape in shapeOptions"
             :key="shape.value"
             type="button"
-            @click="updateProperty('shape', shape.value)"
             class="
               h-20
               bg-slate-700
@@ -536,6 +535,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
               '!bg-emerald-600 !border-emerald-400':
                 currentShape === shape.value
             }"
+            @click="updateProperty('shape', shape.value)"
           >
 
             <!-- Shape Preview -->
@@ -581,32 +581,32 @@ const activeTab = ref<'properties' | 'style'>('properties')
           <input
             v-if="backgroundColorValue() !== ''"
             :value="backgroundColorValue()"
+            type="color"
+            class="w-10 h-9 p-1 bg-slate-900 rounded
+                   border border-slate-700 cursor-pointer"
             @input="
               updateProperty(
                 'backgroundColor',
                 ($event.target as HTMLInputElement).value
               )
             "
-            type="color"
-            class="w-10 h-9 p-1 bg-slate-900 rounded
-                   border border-slate-700 cursor-pointer"
           />
 
           <!-- Hex -->
           <input
             :value="backgroundColorValue()"
-            @input="
-              updateProperty(
-                'backgroundColor',
-                ($event.target as HTMLInputElement).value
-              )
-            "
             type="text"
             placeholder="#1e293b"
             class="flex-1 px-3 py-1.5 bg-slate-900
                    rounded border border-slate-700
                    text-slate-100 font-mono text-xs
                    focus:outline-none focus:border-emerald-500"
+            @input="
+              updateProperty(
+                'backgroundColor',
+                ($event.target as HTMLInputElement).value
+              )
+            "
           />
         </div>
 
@@ -615,12 +615,12 @@ const activeTab = ref<'properties' | 'style'>('properties')
           <button
             v-for="color in presetColors"
             :key="color"
-            @click="updateProperty('backgroundColor', color)"
             class="w-7 h-7 rounded-full
                    border border-slate-600
                    transition-transform
                    hover:scale-110 active:scale-95"
             :style="{ backgroundColor: color }"
+            @click="updateProperty('backgroundColor', color)"
           />
         </div>
       </div>

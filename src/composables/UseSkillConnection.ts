@@ -70,7 +70,9 @@ export function useSkillConnection(
 
     try {
       endConnection()
-    } catch {}
+    }catch{
+
+    }
 
     cleanup()
 
@@ -88,6 +90,8 @@ export function useSkillConnection(
         targetHandle: 'center-target',
         type: 'floating',
         markerEnd: MarkerType.ArrowClosed,
+        animated: true
+        
       },
     ])
   }

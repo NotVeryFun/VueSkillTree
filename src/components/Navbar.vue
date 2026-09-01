@@ -7,12 +7,14 @@ import {
   Gamepad2,
   Upload,
 } from 'lucide-vue-next'
+import type { GraphEdge, GraphNode } from '@vue-flow/core';
+import type { SkillGraphNode } from '../type/SkillNode';
 
 const emit = defineEmits<{
   (e: 'toggle-sidebar'): void
   (e: 'export-json'): void
   (e: 'export-game-data'): void
-  (e: 'import-json', data: { nodes: any[]; edges: any[] }): void
+  (e: 'import-json', data: { nodes: GraphNode<SkillGraphNode>[]; edges: GraphEdge[] }): void
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -99,7 +101,6 @@ const handleFileChange = (event: Event) => {
 
       <!-- Sidebar -->
       <button
-        @click="emit('toggle-sidebar')"
         class="
           w-9
           h-9
@@ -122,6 +123,7 @@ const handleFileChange = (event: Event) => {
           transition
         "
         title="切換側邊欄"
+        @click="emit('toggle-sidebar')"
       >
         <PanelLeft :size="18" />
       </button>
@@ -165,7 +167,6 @@ const handleFileChange = (event: Event) => {
       <!-- ================================================== -->
 
       <button
-        @click="emit('export-json')"
         class="
           h-9
           px-3
@@ -191,6 +192,7 @@ const handleFileChange = (event: Event) => {
           transition
         "
         title="儲存完整的 Vue Flow 編輯器資料"
+        @click="emit('export-json')"
       >
         <Save :size="15" />
 
@@ -205,7 +207,6 @@ const handleFileChange = (event: Event) => {
       <!-- ================================================== -->
 
       <button
-        @click="emit('export-game-data')"
         class="
           h-9
           px-3
@@ -229,6 +230,7 @@ const handleFileChange = (event: Event) => {
           shadow-sm
         "
         title="匯出給遊戲引擎使用的 Skill Tree JSON"
+        @click="emit('export-game-data')"
       >
         <Gamepad2 :size="15" />
 
@@ -250,7 +252,6 @@ const handleFileChange = (event: Event) => {
       <!-- ================================================== -->
 
       <button
-        @click="triggerFileInput"
         class="
           h-9
           px-3
@@ -274,6 +275,7 @@ const handleFileChange = (event: Event) => {
           shadow-sm
         "
         title="載入之前儲存的編輯器 JSON"
+        @click="triggerFileInput"
       >
         <Upload :size="15" />
 

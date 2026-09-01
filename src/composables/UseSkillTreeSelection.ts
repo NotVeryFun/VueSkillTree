@@ -13,13 +13,14 @@ import type { SkillNodeData } from '../type/SkillNode'
 
 export function useSkillTreeSelection() {
   const {
-    onNodeClick,
     onEdgeClick,
     onPaneClick,
     onSelectionDragStop,
     onSelectionEnd,
     getNodes,
-    removeSelectedNodes
+    removeSelectedNodes,
+    findNode,
+  
   } = useVueFlow()
 
   const {
@@ -53,18 +54,40 @@ export function useSkillTreeSelection() {
   // ============================================================
   // 點擊 Node
   // ============================================================
+const updateSelectionSelectedNodes = ({
+    nodeId: id,
+    e,
+}: {
+    nodeId: string
+    e: PointerEvent
+}) => {
+    console.log('Shift:', e.shiftKey)
 
- onNodeClick(({ node }) => {
-  console.log('[Selection] Node Click:', node.id)
+    const node = findNode(id)
 
-  // 等 Vue Flow 更新 selected 狀態
-  requestAnimationFrame(() => {
-    updateSelectedNodes()
+    if (node == undefined) {
+        return
+    }
 
-  })
+    const currNodes = getNodes.value
 
-  selectedEdges.value = []
-})
+    // 沒有按 Shift → 清除其他選取
+    if (!e.shiftKey) {
+        for (const n of currNodes) {
+            n.selected = false
+        }
+    }
+
+    // 按 Shift → 保留原本選取狀態
+    node.selected = !node.selected
+
+    requestAnimationFrame(() => {
+        
+    })
+    _updateSelectedNodes()
+
+    selectedEdges.value = []
+}
 
   // ============================================================
   // 點擊 Edge
@@ -102,7 +125,7 @@ export function useSkillTreeSelection() {
   // 更新目前被選取的 Node
   // ============================================================
 
-  const updateSelectedNodes = () => {
+  const _updateSelectedNodes = () => {
 
     const nodes: GraphNode<any, any, string>[] = getNodes.value
 
@@ -119,7 +142,7 @@ export function useSkillTreeSelection() {
 
   onSelectionEnd(
     (_e: globalThis.MouseEvent) => {
-      updateSelectedNodes()
+      _updateSelectedNodes()
     }
   )
 
@@ -132,14 +155,14 @@ export function useSkillTreeSelection() {
       return
     }
 
-    let newNodes = duplicateSelectedNodes()
+    const newNodes = duplicateSelectedNodes()
     console.log("[duplicateSelected]")
     console.log(selectedNodes)
     // Vue Flow 更新 Node selection 後，
     // 下一幀重新取得實際選取狀態
     
     requestAnimationFrame(() => {
-      updateSelectedNodes()
+      _updateSelectedNodes()
     })
 
     
@@ -212,5 +235,6 @@ export function useSkillTreeSelection() {
 
   duplicateSelected,
   deleteSelected,
+  updateSelectionSelectedNodes
 }
 }

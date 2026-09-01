@@ -167,6 +167,9 @@ const edgePath = computed(() => {
     :style="{
       ...style,
       strokeWidth: 3.5,
+    
     }"
+    
+    
   />
 </template>

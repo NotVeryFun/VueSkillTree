@@ -1,10 +1,11 @@
 ```vue
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Handle, Position, type NodeProps } from '@vue-flow/core'
+import { Handle, Position, type NodeProps} from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import '@vue-flow/node-resizer/dist/style.css'
 import type { SkillNodeData } from '../type/SkillNode'
+
 
 export type SkillNodeShape =
   | 'square'
@@ -43,9 +44,29 @@ const emit = defineEmits<{
   (
     e: 'leave'
   ): void
+
+  (
+    e: 'select',
+    payload: {
+      nodeId: string,
+      e : PointerEvent
+    }
+  ): void
 }>()
 
 
+const handlePointerDown = (e : PointerEvent) => {
+  console.log("[handlePointerDown]")
+
+  emit(
+    'select',
+    {
+      nodeId: props.id,
+      e: e
+    }
+  )
+  
+}
 
 let plusMoved = false
 let plusStartX = 0
@@ -117,6 +138,7 @@ const handlePlusPointerDown = (
   )
 
   // 開始 connection
+  
   emit(
     'start-skill-connection',
     {
@@ -168,7 +190,8 @@ const shapeClass = computed(() => {
 </script>
 
 <template>
-    <div class="
+    <div
+class="
         w-full h-full 
         relative 
         
@@ -209,6 +232,8 @@ const shapeClass = computed(() => {
       
       "
 
+      @pointerdown.stop = "handlePointerDown($event)"
+
       @pointerenter="emit('hover', {
           nodeId: props.id,
           event: $event
@@ -246,7 +271,7 @@ const shapeClass = computed(() => {
         
         >
 
-            <!-- 白色虛線選取框 -->
+            <!-- 白色虛線選取框 --> 
             <div
             v-if="selected"
             class="absolute inset-[-15px] border border-dashed border-white pointer-events-none z-10"
