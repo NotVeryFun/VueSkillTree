@@ -1,11 +1,13 @@
 import type { Node, Edge } from '@vue-flow/core'
+import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from '../utils/grid'
+
 export const initialNodes: Node[] = [
   {
     id: '1',
     type: 'custom',
     position: { x: 0, y: 0 },
-    width: '64px',
-    height: '64px',
+    width: DEFAULT_NODE_WIDTH,
+    height: DEFAULT_NODE_HEIGHT,
     data: {
       label: '核心天賦：基礎體魄',
       icon: 'axe.svg',
@@ -20,8 +22,8 @@ export const initialNodes: Node[] = [
     id: '2',
     type: 'custom',
     position: { x: -256, y: -256 },
-    width: '64px',
-    height: '64px',
+    width: DEFAULT_NODE_WIDTH,
+    height: DEFAULT_NODE_HEIGHT,
     data: {
       label: '分支 A：力量狂暴',
       icon: 'axe.svg',
@@ -35,8 +37,8 @@ export const initialNodes: Node[] = [
     id: '3',
     type: 'custom',
     position: { x: 256, y: -256 },
-    width: '64px',
-    height: '64px',
+    width: DEFAULT_NODE_WIDTH,
+    height: DEFAULT_NODE_HEIGHT,
     data: {
       label: '分支 B：疾風步',
       icon: 'axe.svg',

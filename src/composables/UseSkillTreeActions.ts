@@ -3,6 +3,16 @@ import {
   useVueFlow,
   type XYPosition,
 } from '@vue-flow/core'
+import {
+  DEFAULT_NODE_HEIGHT,
+  DEFAULT_NODE_WIDTH,
+  DUPLICATE_OFFSET,
+  NEW_NODE_OFFSET,
+  getNodeSize,
+  snapCenterToTopLeft,
+  snapPosition,
+  topLeftToCenter,
+} from '../utils/grid'
 
 export function useSkillTreeActions(
   onBeforeChange?: () => void
@@ -80,26 +90,38 @@ export function useSkillTreeActions(
       return
     }
 
-    const offset = 180
+    // VueFlow v1 position = 左上角,先換算出 source 中心,
+    // 再用中心 + 偏移決定新節點中心,最後吸附回左上角
+    const sourceSize = getNodeSize(sourceNode)
+    const sourceCenter = topLeftToCenter(
+      sourceNode.position,
+      sourceSize.width,
+      sourceSize.height,
+    )
 
-    let x = sourceNode.position.x
-    let y = sourceNode.position.y
+    const targetCenter: XYPosition = { ...sourceCenter }
 
     if (position === 'top') {
-      y -= offset
+      targetCenter.y -= NEW_NODE_OFFSET
     }
 
     if (position === 'bottom') {
-      y += offset
+      targetCenter.y += NEW_NODE_OFFSET
     }
 
     if (position === 'left') {
-      x -= offset
+      targetCenter.x -= NEW_NODE_OFFSET
     }
 
     if (position === 'right') {
-      x += offset
+      targetCenter.x += NEW_NODE_OFFSET
     }
+
+    const snappedTopLeft = snapCenterToTopLeft(
+      targetCenter,
+      DEFAULT_NODE_WIDTH,
+      DEFAULT_NODE_HEIGHT,
+    )
 
 
     onBeforeChange?.()
@@ -109,11 +131,10 @@ export function useSkillTreeActions(
       {
         id,
         type: 'custom',
+        width: DEFAULT_NODE_WIDTH,
+        height: DEFAULT_NODE_HEIGHT,
 
-        position: {
-          x,
-          y,
-        },
+        position: snappedTopLeft,
 
         data: {
           label: '新天賦節點',
@@ -154,6 +175,13 @@ export function useSkillTreeActions(
         y: e.clientY,
       })
 
+    // 滑鼠點 = 期望的中心點,吸附後再換算回左上角
+    const snappedTopLeft = snapCenterToTopLeft(
+      flowPos,
+      DEFAULT_NODE_WIDTH,
+      DEFAULT_NODE_HEIGHT,
+    )
+
     const id = createNodeId()
     onBeforeChange?.()
     addNodes([
@@ -161,8 +189,10 @@ export function useSkillTreeActions(
         id,
 
         type: 'custom',
+        width: DEFAULT_NODE_WIDTH,
+        height: DEFAULT_NODE_HEIGHT,
 
-        position: flowPos,
+        position: snappedTopLeft,
 
         data: {
           label: '新天賦節點',
@@ -217,13 +247,19 @@ export function useSkillTreeActions(
 
   const idMap = new Map<string, string>()
 
-  const OFFSET = 40
-
   const newNodes = selectedNodes.map((node, index) => {
 
     const newId = `node_${Date.now()}_${index}`
 
     idMap.set(node.id, newId)
+
+    // 舊中心 + 位移 -> 吸附 -> 換算回左上角,保持中心對齊
+    const size = getNodeSize(node)
+    const oldCenter = topLeftToCenter(node.position, size.width, size.height)
+    const newCenter = snapPosition({
+      x: oldCenter.x + DUPLICATE_OFFSET,
+      y: oldCenter.y + DUPLICATE_OFFSET,
+    })
 
     return {
       ...node,
@@ -231,8 +267,8 @@ export function useSkillTreeActions(
       id: newId,
 
       position: {
-        x: node.position.x + OFFSET,
-        y: node.position.y + OFFSET,
+        x: newCenter.x - size.width / 2,
+        y: newCenter.y - size.height / 2,
       },
 
       selected: true,

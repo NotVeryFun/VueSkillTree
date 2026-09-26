@@ -221,7 +221,8 @@ class="
     />
 
     <div
-      class="relative w-full h-full flex flex-col items-center justify-center p-3 bg-teal-800 text-white transition-colors min-w-[80px] min-h-[80px] box-border
+      class="relative w-full h-full flex flex-col items-center justify-center p-3 bg-teal-800 text-white transition-colors 
+      min-w-[64px] min-h-[64px] box-border
       
       
       

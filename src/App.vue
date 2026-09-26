@@ -34,6 +34,13 @@ import type { SkillNodeData } from './type/SkillNode.ts'
 
 import { useSkillTreeHistory } from './composables/UseSkillTreeHistory'
 import { useSkillTreeKeyboard } from './composables/UseSkillTreeKeyboard'
+import {
+  BACKGROUND_GAP,
+  SNAP_GRID,
+  getNodeSize,
+  snapPosition,
+  topLeftToCenter,
+} from './utils/grid'
 
 const nodes = ref(initialNodes)
 const edges = ref(initialEdges)
@@ -154,8 +161,33 @@ const {
 
 const {
     getIntersectingNodes,
-    screenToFlowCoordinate
+    screenToFlowCoordinate,
+    onNodeDragStop,
+    onSelectionDragStop,
   } = useVueFlow()
+
+// ============================================================
+// 拖曳結束後把「中心」吸回格子
+// VueFlow v1 snap-to-grid 只吸左上角,尺寸不是 32 倍數時中心會飄,
+// 所以這裡再做一次中心校正,保證視覺中心壓在 Dots 上
+// ============================================================
+const snapNodeCenter = (node: { position: { x: number; y: number }; dimensions?: { width?: number; height?: number }; width?: unknown; height?: unknown }) => {
+  const size = getNodeSize(node as { dimensions?: { width?: number; height?: number }; width?: number | string | null; height?: number | string | null })
+  const center = topLeftToCenter(node.position, size.width, size.height)
+  const snapped = snapPosition(center)
+  node.position.x = snapped.x - size.width / 2
+  node.position.y = snapped.y - size.height / 2
+}
+
+onNodeDragStop(({ node }) => {
+  snapNodeCenter(node)
+})
+
+onSelectionDragStop(({ nodes: draggedNodes }) => {
+  for (const node of draggedNodes ?? []) {
+    snapNodeCenter(node)
+  }
+})
 
 const tooltip = ref<SkillTooltipState>({
   visible: false,
@@ -403,17 +435,23 @@ const updateNodeId = (newId: string) => {
         :selection-mode="SelectionMode.Partial"
         :selection-on-drag="false"
         :selection-key-code="true"
+        :edges-focusable="true"
+        
+        
 
-        :elements-selectable="false"
+        :elements-selectable="true"
         :nodes-focusable="false"
 
 
 
         :zoom-on-double-click="false"
+        :select-nodes-on-drag="false"
+        :elevate-nodes-on-select="false"
 
 
         :snap-to-grid="true"
-        :snap-grid="[32, 32]"
+        :snap-grid="SNAP_GRID"
+        
       >
         <template #node-custom="nodeProps">
           <SkillNode
@@ -428,8 +466,8 @@ const updateNodeId = (newId: string) => {
         </template>
         <Background 
         :variant="BackgroundVariant.Dots"
-        :gap="64"
-        :size="5"
+        :gap="BACKGROUND_GAP"
+        :size="3"
         
         />
       </VueFlow>
@@ -443,6 +481,7 @@ const updateNodeId = (newId: string) => {
         :cost-per-level="tooltip.node?.costPerLevel"
         :max-level="tooltip.node?.maxLevel"
         :current-level="tooltip.node?.currentLevel"
+        
       />
     </div>
 

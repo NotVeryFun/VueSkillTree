@@ -80,10 +80,11 @@ const updateSelectionSelectedNodes = ({
 
     // 按 Shift → 保留原本選取狀態
     node.selected = !node.selected
-
+    /*
     requestAnimationFrame(() => {
         
     })
+    */
     _updateSelectedNodes()
 
     selectedEdges.value = []
