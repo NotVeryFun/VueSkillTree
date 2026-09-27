@@ -44,29 +44,8 @@ const emit = defineEmits<{
   (
     e: 'leave'
   ): void
-
-  (
-    e: 'select',
-    payload: {
-      nodeId: string,
-      e : PointerEvent
-    }
-  ): void
 }>()
 
-
-const handlePointerDown = (e : PointerEvent) => {
-  console.log("[handlePointerDown]")
-
-  emit(
-    'select',
-    {
-      nodeId: props.id,
-      e: e
-    }
-  )
-  
-}
 
 let plusMoved = false
 let plusStartX = 0
@@ -192,7 +171,7 @@ const shapeClass = computed(() => {
 
 <template>
     <div
-class="
+      class="
         w-full h-full 
         relative 
         
@@ -235,7 +214,6 @@ class="
       
       "
 
-      @pointerdown.stop = "handlePointerDown($event)"
 
       @pointerenter="emit('hover', {
           nodeId: props.id,

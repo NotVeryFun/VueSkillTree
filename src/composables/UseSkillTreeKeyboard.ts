@@ -1,3 +1,4 @@
+
 export function useSkillTreeKeyboard({
   duplicateSelected,
   deleteSelected,
@@ -78,7 +79,7 @@ export function useSkillTreeKeyboard({
       event.key.toLowerCase() === 'd'
     ) {
       event.preventDefault()
-
+      
       duplicateSelected()
 
       return

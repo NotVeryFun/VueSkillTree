@@ -7,17 +7,14 @@ import {
 import { useSkillTreeActions } from './UseSkillTreeActions'
 
 
-export function useSkillTreeSelection() {
+export function useSkillTreeSelection(BeforeAction : () => void) {
   const {
     onEdgeClick,
-    onPaneClick,
-    onSelectionDragStop,
-    onSelectionEnd,
     getNodes,
     getEdges,
     removeSelectedNodes,
+    addSelectedEdges,
     findNode,
-
     addSelectedNodes  
   } = useVueFlow()
 
@@ -31,7 +28,7 @@ export function useSkillTreeSelection() {
   // 清除選取
   // ============================================================
 
-  const clearSelection = () => {
+  const clearSelectionNode = () => {
 
       removeSelectedNodes(
           getNodes.value.filter(
@@ -77,13 +74,12 @@ const updateSelectionSelectedNodes = ({
     }
 
     // 按 Shift → 保留原本選取狀態
-    node.selected = !node.selected
+    //node.selected = !node.selected
     /*
     requestAnimationFrame(() => {
         
     })
     */
-    _updateSelectedNodes()
 
 }
 
@@ -93,57 +89,26 @@ const updateSelectionSelectedNodes = ({
 
   onEdgeClick(({ edge }) => {
 
-    clearSelection()
-
-    edge.selected = true;
+    clearSelectionNode()
+    addSelectedEdges([edge])
 
     })
-  // ============================================================
-  // 點擊 Pane
-  // ============================================================
 
-  onPaneClick(() => {
-    clearSelection()
-  })
-
-  // ============================================================
-  // 框選結束 / Drag Stop
-  // ============================================================
-
-  onSelectionDragStop(
-    () => {
-      
-    }
-  )
-
-  // ============================================================
-  // 更新目前被選取的 Node
-  // ============================================================
-
-  const _updateSelectedNodes = () => {
-
-  }
-
-  onSelectionEnd(
-    (_e: globalThis.MouseEvent) => {
-      _updateSelectedNodes()
-    }
-  )
-
-  // ============================================================
-  // Ctrl + D
-  // ============================================================
-
+  
   const duplicateSelected = () => {
     if (selectedNodes.value.length === 0) {
       return
     }
 
+    
+    BeforeAction()
     const newNodes = duplicateSelectedNodes()
     console.log("[duplicateSelected]")
     console.log(selectedNodes)
     // Vue Flow 更新 Node selection 後，
     // 下一幀重新取得實際選取狀態
+
+    
     addSelectedNodes(newNodes)
 
   }
@@ -153,6 +118,12 @@ const updateSelectionSelectedNodes = ({
   // ============================================================
 
   const deleteSelected = () => {
+    
+    if(selectedNodes.value.length > 0 || selectedEdges.value.length > 0){
+        BeforeAction()
+        console.log("[deleteSelected] pushed!")
+    }
+
     if (selectedNodes.value.length > 0) {
       const node_ids = []
 
@@ -164,7 +135,8 @@ const updateSelectionSelectedNodes = ({
 
       deleteNodes(node_ids)
 
-      clearSelection()
+      clearSelectionNode()
+      
     }
 
     if (selectedEdges.value.length > 0) {
@@ -177,7 +149,7 @@ const updateSelectionSelectedNodes = ({
 
       deleteEdges(edge_ids)
 
-      clearSelection()
+      clearSelectionNode()
       
     }
   }
@@ -186,7 +158,7 @@ const updateSelectionSelectedNodes = ({
   selectedNodes,
   selectedEdges,
 
-  clearSelection,
+  clearSelection: clearSelectionNode,
 
   duplicateSelected,
   deleteSelected,

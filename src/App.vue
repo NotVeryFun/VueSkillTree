@@ -192,7 +192,7 @@ const {
   duplicateSelected,
   deleteSelected,
   updateSelectionSelectedNodes
-} = useSkillTreeSelection()
+} = useSkillTreeSelection(saveHistory)
 
 
 
@@ -369,7 +369,7 @@ const handleDoubleClick = (event: MouseEvent) => {
         :pan-on-drag="[1]"
 
         :selection-mode="SelectionMode.Partial"
-        :selection-on-drag="false"
+        :selection-on-drag="true"
         :selection-key-code="true"
         :edges-focusable="true"
         
@@ -387,6 +387,7 @@ const handleDoubleClick = (event: MouseEvent) => {
 
         :snap-to-grid="true"
         :snap-grid="SNAP_GRID"
+        :multi-selection-key-code="'shift'"
         
       
         

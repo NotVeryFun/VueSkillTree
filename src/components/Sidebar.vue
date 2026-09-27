@@ -7,7 +7,8 @@ import { useVueFlow } from '@vue-flow/core'
 
 
 const {
-  getNodes  
+  getNodes  ,
+  getEdges,
 } = useVueFlow()
 
 interface SidebarProps {
@@ -150,12 +151,12 @@ const updateNodeId = (newId: string) => {
 
 
   for(const node of props.nodes){
-    selectedIds.add(node.id)
+    selectedIds.add(node.data.skill_id)
   }
 
   const duplicated = getNodes.value.some(
     node =>
-      node.id === trimmedId &&
+      node.data.skill_id === trimmedId &&
       !selectedIds.has(node.id)
   )
 
@@ -167,7 +168,13 @@ const updateNodeId = (newId: string) => {
 
   //真正可以改ID，理論上來說只能改一個node
   const selectedNode = props.nodes[0]
-  selectedNode.id = trimmedId
+   
+  selectedNode.data.skill_id = trimmedId
+
+
+ 
+
+  
 
 }
 
@@ -205,6 +212,9 @@ const currentShape = computed(() => {
 const activeTab = ref<'properties' | 'style'>('properties')
 
 function addCustomProperty(node : SkillGraphNode){
+  if(node.data.kvs == undefined){
+      node.data.kvs = []
+  }
   node.data.kvs.push({key : "" , value : ""})
 
 }
@@ -221,7 +231,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
            bg-slate-800 border-r border-slate-700 shadow-2xl
            z-20 transition-transform duration-0 ease-in-out
            p-5 flex flex-col text-slate-100"
-    :class="isOpen && !isNoNodeSelected() ? 'translate-x-0' : '-translate-x-full'"
+    :class="!isNoNodeSelected() ? 'translate-x-0' : '-translate-x-full'"
   >
 
     <!-- 標題 -->
@@ -308,7 +318,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         </label>
 
         <input
-          :value="nodes.length === 1 ? nodes[0].id : ''"
+          :value="nodes.length === 1 ? nodes[0].data.skill_id : ''"
           type="text"
           :disabled="nodes.length !== 1"
           :placeholder="
@@ -487,7 +497,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         </div>
         
         <div
-          class="max-h-64 overflow-y-auto
+          class="max-h-96 overflow-y-auto
                 pr-1 space-y-2"
         >
           <div
@@ -549,7 +559,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
 
 
     <!-- 樣式 -->
-    <div v-else>
+    <div v-else class="flex flex-col gap-2">
       <!-- Icon -->
       <!-- Shape -->
       <!-- Color -->
@@ -562,7 +572,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                  uppercase tracking-wider block mb-1"
         >
-          Icon SVG 檔名
+          Icon
         </label>
 
         <!-- input
@@ -583,7 +593,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
 
         <!-- Icon 選擇 -->
         <div
-          class="grid grid-cols-5 gap-2 max-h-48
+          class="grid grid-cols-5 gap-2 max-h-80
                  overflow-y-auto p-1 bg-slate-900/50
                  rounded border border-slate-700
                  

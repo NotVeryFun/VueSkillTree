@@ -1,8 +1,15 @@
 import type { GraphNode } from '@vue-flow/core'
 import type { SkillNodeShape } from '../components/SkillNode.vue'
 
+
+export interface SkillNodeCustomProperty {
+  key : string , 
+  value : string
+}
+
 export interface SkillNodeData {
 // ===== 屬性 =====
+  skill_id : string
   label?: string
   description?: string
   maxLevel : number
@@ -13,8 +20,7 @@ export interface SkillNodeData {
   backgroundColor?: string
   shape?: SkillNodeShape
 
-  kvs : [{key : string , value : string}]
-
+  kvs : SkillNodeCustomProperty[]
 }
 
 export type SkillGraphNode = GraphNode<SkillNodeData>

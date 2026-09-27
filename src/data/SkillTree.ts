@@ -9,6 +9,7 @@ export const initialNodes: Node[] = [
     width: DEFAULT_NODE_WIDTH,
     height: DEFAULT_NODE_HEIGHT,
     data: {
+      skill_id: '11',
       label: '核心天賦：基礎體魄',
       icon: 'axe.svg',
       shape: 'rounded-rectangle',
@@ -26,6 +27,7 @@ export const initialNodes: Node[] = [
     width: DEFAULT_NODE_WIDTH,
     height: DEFAULT_NODE_HEIGHT,
     data: {
+      skill_id: '12',
       label: '分支 A：力量狂暴',
       icon: 'axe.svg',
       shape: 'circle',
@@ -42,6 +44,7 @@ export const initialNodes: Node[] = [
     width: DEFAULT_NODE_WIDTH,
     height: DEFAULT_NODE_HEIGHT,
     data: {
+      skill_id: '13',
       label: '分支 B：疾風步',
       icon: 'axe.svg',
       shape: 'square',
