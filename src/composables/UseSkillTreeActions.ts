@@ -24,13 +24,10 @@ export function useSkillTreeActions(
     addEdges,
     removeNodes,
     removeEdges,
-    removeSelectedEdges,
     removeSelectedNodes,
     screenToFlowCoordinate,
     getNodes,
-    getEdges,
-    setNodes
-  } = useVueFlow()
+    getEdges  } = useVueFlow()
 
   
 

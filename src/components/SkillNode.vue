@@ -211,8 +211,8 @@ class="
       :min-height="128"
       :line-style="selected ? { border: '10px solid transparent' } : { display: 'none' }"
       :handle-style="selected ? {
-        width: '12px',
-        height: '12px',
+        width: '16px',
+        height: '16px',
         padding: '0px',
         background: 'rgb(96 165 250)',
         border: 'none',
@@ -222,7 +222,8 @@ class="
     />
 
     <div
-      class="relative w-full h-full flex flex-col items-center justify-center p-3 bg-teal-800 text-white transition-colors 
+      class="relative w-full h-full flex flex-col items-center justify-center p-3
+       bg-teal-800 text-white transition-colors 
       min-w-[64px] min-h-[64px] box-border
       
       

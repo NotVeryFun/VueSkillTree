@@ -19,11 +19,7 @@ export function useSkillTreeSelection() {
     removeSelectedNodes,
     findNode,
 
-    addSelectedNodes,
-    addSelectedEdges,
-    removeSelectedEdges,
-    removeSelectedElements
-  
+    addSelectedNodes  
   } = useVueFlow()
 
   const {
@@ -116,7 +112,7 @@ const updateSelectionSelectedNodes = ({
   // ============================================================
 
   onSelectionDragStop(
-    (e: NodeDragEvent) => {
+    () => {
       
     }
   )

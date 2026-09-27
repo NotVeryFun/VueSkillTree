@@ -251,31 +251,6 @@ const {
 })
 
 
-
-// ============================================================
-// 拖曳結束後把「中心」吸回格子
-// VueFlow v1 snap-to-grid 只吸左上角,尺寸不是 32 倍數時中心會飄,
-// 所以這裡再做一次中心校正,保證視覺中心壓在 Dots 上
-// ============================================================
-const snapNodeCenter = (node: { position: { x: number; y: number }; dimensions?: { width?: number; height?: number }; width?: unknown; height?: unknown }) => {
-  const size = getNodeSize(node as { dimensions?: { width?: number; height?: number }; width?: number | string | null; height?: number | string | null })
-  const center = topLeftToCenter(node.position, size.width, size.height)
-  const snapped = snapPosition(center)
-  node.position.x = snapped.x - size.width / 2
-  node.position.y = snapped.y - size.height / 2
-}
-
-onNodeDragStop(({ node }) => {
-  snapNodeCenter(node)
-})
-
-onSelectionDragStop(({ nodes: draggedNodes }) => {
-  for (const node of draggedNodes ?? []) {
-    snapNodeCenter(node)
-  }
-})
-
-
 const presetColors = [
   '#ef4444',
   '#f97316',
@@ -471,6 +446,8 @@ const updateNodeId = (newId: string) => {
         :snap-to-grid="true"
         :snap-grid="SNAP_GRID"
         
+      
+        
       >
         <template #node-custom="nodeProps">
           <SkillNode
@@ -488,6 +465,7 @@ const updateNodeId = (newId: string) => {
         :variant="BackgroundVariant.Dots"
         :gap="BACKGROUND_GAP"
         :size="3"
+        :offset="[1.5,1.5]"
         
         />
       </VueFlow>
