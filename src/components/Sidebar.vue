@@ -7,8 +7,7 @@ import { useVueFlow } from '@vue-flow/core'
 
 
 const {
-  getNodes  ,
-  getEdges,
+  getNodes,
 } = useVueFlow()
 
 interface SidebarProps {

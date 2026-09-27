@@ -13,6 +13,7 @@ import {
   snapPosition,
   topLeftToCenter,
 } from '../utils/grid'
+import type { SkillGraphNode, SkillNodeCustomProperty } from '../type/SkillNode'
 
 export function useSkillTreeActions(
   onBeforeChange?: () => void
@@ -129,15 +130,22 @@ export function useSkillTreeActions(
     const id = createNodeId()
     
 
-
-
-    addNodes([
-      {
+    const newNode = {
         ...sourceNode,
         id:id,
-        position:snappedTopLeft
+        position:snappedTopLeft,
+        data:{
+          ...sourceNode.data,
+          skill_id : id,
+          kvs : sourceNode.data.kvs.map((kv : SkillNodeCustomProperty) => {kv})
+
+
+        }
         
-      },
+        
+    } as SkillGraphNode;
+    addNodes([
+      newNode
     ])
     removeSelectedNodes([sourceNode]);
 
