@@ -1,8 +1,7 @@
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 import {
   useVueFlow,
-  type NodeDragEvent,
 } from '@vue-flow/core'
 
 import { useSkillTreeActions } from './UseSkillTreeActions'
