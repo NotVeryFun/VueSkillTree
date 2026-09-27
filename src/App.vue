@@ -52,6 +52,14 @@ const nodeTypes = {
 const edgeTypes = {
   floating: markRaw(FloatingEdge),
 }
+const {
+    getIntersectingNodes,
+    screenToFlowCoordinate,
+    onNodeDragStop,
+    onSelectionDragStop,
+    onNodesChange
+  } = useVueFlow()
+
 
 const {
   undo,
@@ -100,6 +108,90 @@ const {
   iconUrlMap,
 } = useSkillIcons()
 
+
+
+const tooltip = ref<SkillTooltipState>({
+  visible: false,
+  x: 0,
+  y: 0,
+  node: null,
+})
+
+
+
+
+interface SkillTooltipData {
+  id: string
+  label?: string
+  description?: string
+  icon?: string
+  backgroundColor?: string
+  shape?: SkillNodeShape
+  maxLevel?: number
+  costPerLevel?: number
+  currentLevel?: number
+}
+
+interface SkillTooltipState {
+  visible: boolean
+  x: number
+  y: number
+  node: SkillTooltipData | null
+}
+
+const handleNodeHover = (payload: {
+  nodeId: string
+  event: PointerEvent
+}) => {
+  const { nodeId, event } = payload
+
+  const node = nodes.value.find(
+    (node: { id: string }) => node.id === nodeId
+  ) 
+
+  if (!node) {
+    tooltip.value.visible = false
+    return
+  }
+
+  tooltip.value = {
+    visible: true,
+    x: event.clientX + 15,
+    y: event.clientY + 15,
+
+    node: {
+      id: node.id,
+      label: node.data.label,
+      description: node.data.description,
+      icon: node.data.icon,
+      backgroundColor: node.data.backgroundColor,
+      shape: node.data.shape,
+      maxLevel: node.data.maxLevel,
+      costPerLevel: node.data.costPerLevel,
+      currentLevel: node.data.currentLevel,
+    },
+  }
+}
+
+
+
+
+
+const handleNodeLeave = () => {
+  tooltip.value.visible = false
+}
+
+
+//tooltip被刪除掉之後，發現自己沒有雨Node重疊
+onNodesChange((changes) => {
+  for(const change of changes){
+    if(change.type == 'remove'){
+      if(tooltip.value.node && tooltip.value.node.id == change.id){
+        tooltip.value.visible = false;
+      }
+    }
+  }
+})
 
 const {
   selectedNodes,
@@ -159,12 +251,6 @@ const {
 })
 
 
-const {
-    getIntersectingNodes,
-    screenToFlowCoordinate,
-    onNodeDragStop,
-    onSelectionDragStop,
-  } = useVueFlow()
 
 // ============================================================
 // 拖曳結束後把「中心」吸回格子
@@ -189,73 +275,6 @@ onSelectionDragStop(({ nodes: draggedNodes }) => {
   }
 })
 
-const tooltip = ref<SkillTooltipState>({
-  visible: false,
-  x: 0,
-  y: 0,
-  node: null,
-})
-
-
-
-
-interface SkillTooltipData {
-  id: string
-  label?: string
-  description?: string
-  icon?: string
-  backgroundColor?: string
-  shape?: SkillNodeShape
-  maxLevel?: number
-  costPerLevel?: number
-  currentLevel?: number
-}
-
-interface SkillTooltipState {
-  visible: boolean
-  x: number
-  y: number
-  node: SkillTooltipData | null
-}
-
-const handleNodeHover = (payload: {
-  nodeId: string
-  event: PointerEvent
-}) => {
-  const { nodeId, event } = payload
-
-  const node = nodes.value.find(
-    (node: { id: string }) => node.id === nodeId
-  ) 
-
-  if (!node) {
-    return
-  }
-
-  tooltip.value = {
-    visible: true,
-    x: event.clientX + 15,
-    y: event.clientY + 15,
-
-    node: {
-      id: node.id,
-      label: node.data.label,
-      description: node.data.description,
-      icon: node.data.icon,
-      backgroundColor: node.data.backgroundColor,
-      shape: node.data.shape,
-      maxLevel: node.data.maxLevel,
-      costPerLevel: node.data.costPerLevel,
-      currentLevel: node.data.currentLevel,
-    },
-  }
-}
-
-
-
-const handleNodeLeave = () => {
-  tooltip.value.visible = false
-}
 
 const presetColors = [
   '#ef4444',
@@ -461,6 +480,7 @@ const updateNodeId = (newId: string) => {
             @hover="handleNodeHover"
             @leave="handleNodeLeave"
             @select="updateSelectionSelectedNodes"
+            
             
           />
         </template>

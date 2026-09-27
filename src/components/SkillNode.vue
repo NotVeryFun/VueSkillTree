@@ -100,6 +100,13 @@ const handlePlusPointerDown = (
     ) {
       plusMoved = true
     }
+    emit(
+      'start-skill-connection',
+      {
+        sourceId: props.id,
+        event,
+      }
+    )
   }
 
   const handleUp = () => {
@@ -139,13 +146,7 @@ const handlePlusPointerDown = (
 
   // 開始 connection
   
-  emit(
-    'start-skill-connection',
-    {
-      sourceId: props.id,
-      event,
-    }
-  )
+  
 }
 
 // ============================================================

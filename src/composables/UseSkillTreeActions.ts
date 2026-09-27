@@ -24,11 +24,15 @@ export function useSkillTreeActions(
     addEdges,
     removeNodes,
     removeEdges,
+    removeSelectedEdges,
+    removeSelectedNodes,
     screenToFlowCoordinate,
     getNodes,
     getEdges,
     setNodes
   } = useVueFlow()
+
+  
 
   // ============================================================
   // Node ID
@@ -126,25 +130,19 @@ export function useSkillTreeActions(
 
     onBeforeChange?.()
     const id = createNodeId()
+    
+
+
 
     addNodes([
       {
-        id,
-        type: 'custom',
-        width: DEFAULT_NODE_WIDTH,
-        height: DEFAULT_NODE_HEIGHT,
-
-        position: snappedTopLeft,
-
-        data: {
-          label: '新天賦節點',
-          icon: 'axe.svg',
-
-          maxLevel: 1,
-          costPerLevel: 1,
-        },
+        ...sourceNode,
+        id:id,
+        position:snappedTopLeft
+        
       },
     ])
+    removeSelectedNodes([sourceNode]);
 
     addEdges([
       {
@@ -227,94 +225,89 @@ export function useSkillTreeActions(
    * 都在選取範圍內時，才複製 Edge。
    */
   const duplicateSelectedNodes = () => {
-  const selectedNodes = getNodes.value.filter(
-    node => node.selected
-  )
+    const selectedNodes = getNodes.value.filter(
+      node => node.selected
+    )
 
-  if (selectedNodes.length === 0) {
-    return []
-  }
+    if (selectedNodes.length === 0) {
+      return []
+    }
 
-  const selectedIds = new Set(
-    selectedNodes.map(node => node.id)
-  )
+    const selectedIds = new Set(
+      selectedNodes.map(node => node.id)
+    )
 
-  const selectedEdges = getEdges.value.filter(
-    edge =>
-      selectedIds.has(edge.source) &&
-      selectedIds.has(edge.target)
-  )
+    const selectedEdges = getEdges.value.filter(
+      edge =>
+        selectedIds.has(edge.source) &&
+        selectedIds.has(edge.target)
+    )
 
-  const idMap = new Map<string, string>()
+    
+    const idMap = new Map<string, string>()
+    const newNodes = selectedNodes.map((node, index) => {
+      
+      const newId = `node_${Date.now()}_${index}`
 
-  const newNodes = selectedNodes.map((node, index) => {
+      idMap.set(node.id, newId)
 
-    const newId = `node_${Date.now()}_${index}`
+      // 舊中心 + 位移 -> 吸附 -> 換算回左上角,保持中心對齊
+      const size = getNodeSize(node)
+      const oldCenter = topLeftToCenter(node.position, size.width, size.height)
+      const newCenter = snapPosition({
+        x: oldCenter.x + DUPLICATE_OFFSET,
+        y: oldCenter.y + DUPLICATE_OFFSET,
+      })
 
-    idMap.set(node.id, newId)
+      return {
+        ...node,
 
-    // 舊中心 + 位移 -> 吸附 -> 換算回左上角,保持中心對齊
-    const size = getNodeSize(node)
-    const oldCenter = topLeftToCenter(node.position, size.width, size.height)
-    const newCenter = snapPosition({
-      x: oldCenter.x + DUPLICATE_OFFSET,
-      y: oldCenter.y + DUPLICATE_OFFSET,
+        id: newId,
+
+        position: {
+          x: newCenter.x - size.width / 2,
+          y: newCenter.y - size.height / 2,
+        },
+
+        selected: true,
+
+        data: {
+          ...node.data,
+        },
+      }
     })
 
-    return {
-      ...node,
+    const newEdges = selectedEdges.map(edge => ({
+      ...edge,
 
-      id: newId,
+      id: `e_${idMap.get(edge.source)}-${idMap.get(edge.target)}`,
 
-      position: {
-        x: newCenter.x - size.width / 2,
-        y: newCenter.y - size.height / 2,
-      },
+      source: idMap.get(edge.source)!,
+      target: idMap.get(edge.target)!,
 
-      selected: true,
-
-      data: {
-        ...node.data,
-      },
-    }
-  })
-
-  const newEdges = selectedEdges.map(edge => ({
-    ...edge,
-
-    id: `e_${idMap.get(edge.source)}-${idMap.get(edge.target)}`,
-
-    source: idMap.get(edge.source)!,
-    target: idMap.get(edge.target)!,
-
-    selected: false,
-    animated: true
-  }))
-
-
-
-  onBeforeChange?.()
-  // 取消舊 Node
-  setNodes(
-    getNodes.value.map(node => ({
-      ...node,
       selected: false,
+      animated: true
     }))
-  )
 
-  // 建立新 Node
-  console.log("[duplicateSelectedNodes] new node : ")
-  console.log(newNodes)
-  addNodes(newNodes)
 
-  // 建立新 Edge
-  if (newEdges.length > 0) {
-    addEdges(newEdges)
+
+    onBeforeChange?.()
+    // 取消舊 Node
+    removeSelectedNodes(selectedNodes);
+
+    // 建立新 Node
+    console.log("[duplicateSelectedNodes] new node : ")
+    console.log(newNodes)
+    addNodes(newNodes)
+
+    // 建立新 Edge
+    if (newEdges.length > 0) {
+      addEdges(newEdges)
+    }
+
+    // ★ 把新 Node 回傳給 Selection
+    return newNodes
   }
-
-  // ★ 把新 Node 回傳給 Selection
-  return newNodes
-}
 
   // ============================================================
   // 刪除 Node

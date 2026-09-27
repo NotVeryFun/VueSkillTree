@@ -1,14 +1,11 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import {
   useVueFlow,
-  type GraphNode,
-  type GraphEdge,
   type NodeDragEvent,
 } from '@vue-flow/core'
 
 import { useSkillTreeActions } from './UseSkillTreeActions'
-import type { SkillNodeData } from '../type/SkillNode'
 
 
 export function useSkillTreeSelection() {
@@ -18,8 +15,14 @@ export function useSkillTreeSelection() {
     onSelectionDragStop,
     onSelectionEnd,
     getNodes,
+    getEdges,
     removeSelectedNodes,
     findNode,
+
+    addSelectedNodes,
+    addSelectedEdges,
+    removeSelectedEdges,
+    removeSelectedElements
   
   } = useVueFlow()
 
@@ -29,27 +32,27 @@ export function useSkillTreeSelection() {
     duplicateSelectedNodes,
   } = useSkillTreeActions()
 
-  const selectedNodes =
-    ref<GraphNode<SkillNodeData>[]>([])
-
-  const selectedEdges =
-    ref<GraphEdge[]>([])
-
   // ============================================================
   // 清除選取
   // ============================================================
 
   const clearSelection = () => {
 
-    removeSelectedNodes(
-        getNodes.value.filter(
-        node => node.selected
-        )
-    )
+      removeSelectedNodes(
+          getNodes.value.filter(
+          node => node.selected
+          )
+      )
+  }
 
-    selectedNodes.value = []
-    selectedEdges.value = []
-    }
+
+  const selectedNodes = computed(() => {
+    return getNodes.value.filter((n) => n.selected)
+  })
+
+  const selectedEdges = computed(() => {
+    return getEdges.value.filter((e) => e.selected)
+  })
 
   // ============================================================
   // 點擊 Node
@@ -87,7 +90,6 @@ const updateSelectionSelectedNodes = ({
     */
     _updateSelectedNodes()
 
-    selectedEdges.value = []
 }
 
   // ============================================================
@@ -98,7 +100,7 @@ const updateSelectionSelectedNodes = ({
 
     clearSelection()
 
-    selectedEdges.value = [edge]
+    edge.selected = true;
 
     })
   // ============================================================
@@ -115,10 +117,7 @@ const updateSelectionSelectedNodes = ({
 
   onSelectionDragStop(
     (e: NodeDragEvent) => {
-      selectedNodes.value =
-        e.nodes as GraphNode<SkillNodeData>[]
-
-      selectedEdges.value = []
+      
     }
   )
 
@@ -128,17 +127,6 @@ const updateSelectionSelectedNodes = ({
 
   const _updateSelectedNodes = () => {
 
-    const nodes: GraphNode<any, any, string>[] = getNodes.value
-
-    const selected = []
-
-    for (const node of nodes) {
-        if (node.selected) {
-            selected.push(node)
-        }
-    }
-
-    selectedNodes.value = selected
   }
 
   onSelectionEnd(
@@ -161,14 +149,8 @@ const updateSelectionSelectedNodes = ({
     console.log(selectedNodes)
     // Vue Flow 更新 Node selection 後，
     // 下一幀重新取得實際選取狀態
-    
-    requestAnimationFrame(() => {
-      _updateSelectedNodes()
-    })
+    addSelectedNodes(newNodes)
 
-    
-    selectedNodes.value = newNodes
-    selectedEdges.value = []
   }
 
   // ============================================================
@@ -201,29 +183,8 @@ const updateSelectionSelectedNodes = ({
       deleteEdges(edge_ids)
 
       clearSelection()
-    }
-  }
-
-  // ============================================================
-  // 外部設定選取 Node
-  // ============================================================
-
-  const setSelectedNodes = (
-    nodes: (
-      GraphNode<SkillNodeData> | null
-    )[]
-  ) => {
-
-    const selected = []
-
-    for (const node of nodes) {
-        if (node !== null) {
-            selected.push(node)
-        }
-    }
-
-    selectedNodes.value = selected;
       
+    }
   }
 
   return {
@@ -231,8 +192,6 @@ const updateSelectionSelectedNodes = ({
   selectedEdges,
 
   clearSelection,
-
-  setSelectedNodes,
 
   duplicateSelected,
   deleteSelected,
