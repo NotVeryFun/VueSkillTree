@@ -3,9 +3,14 @@
 import type { SkillNodeShape } from './SkillNode.vue'
 import { computed, ref } from 'vue'
 import type { SkillGraphNode, SkillNodeData } from '../type/SkillNode.ts'
+import { useVueFlow } from '@vue-flow/core'
 
 
-
+const {
+  getNodes,
+  getEdges
+  
+} = useVueFlow()
 
 interface SidebarProps {
   isOpen: boolean
@@ -24,23 +29,6 @@ const props = defineProps<SidebarProps>()
 
 const emit = defineEmits<{
   (e: 'close'): void
-
-  (
-    e: 'update-property',
-    property: keyof SkillNodeData,
-    value: string
-  ): void
-
-  (
-    e: 'update-property-number',
-    property: keyof SkillNodeData,
-    value: number
-  ): void
-
-  (
-    e: 'update-node-id',
-    nodeId: string,
-  ): void
 }>()
 
 const getIconUrl = (iconName: string) => {
@@ -54,8 +42,13 @@ const getIconUrl = (iconName: string) => {
 /**
  * 目前是否為單一 Node
  */
-const isSingleNode = () => {
+const isSingleNodeSelected = () => {
   return props.nodes.length === 1
+}
+
+
+const isNoNodeSelected = () => {
+  return props.nodes.length === 0
 }
 
 /**
@@ -132,14 +125,52 @@ const updateProperty = (
   property: keyof SkillNodeData,
   value: string
 ) => {
-  emit('update-property', property, value)
+
+  for(const n of props.nodes){
+    (n.data[property] as string) = value
+  }
 }
 
 const updatePropertyNumber = (
   property: keyof SkillNodeData,
   value: number
 ) => {
-  emit('update-property-number', property, value)
+
+  for(const n of props.nodes){
+    (n.data[property] as number) = value
+  }
+}
+
+const updateNodeId = (newId: string) => {
+  const trimmedId = newId.trim()
+
+  if (!trimmedId) {
+    return
+  }
+
+  const selectedIds =  new Set();
+
+
+  for(const node of props.nodes){
+    selectedIds.add(node.id)
+  }
+
+  const duplicated = getNodes.value.some(
+    node =>
+      node.id === trimmedId &&
+      !selectedIds.has(node.id)
+  )
+
+  if (duplicated) {
+    alert(`Node ID「${trimmedId}」已經存在。`)
+    return
+  }
+
+
+  //真正可以改ID，理論上來說只能改一個node
+  const selectedNode = props.nodes[0]
+  selectedNode.id = trimmedId
+
 }
 
 const labelValue = () => {
@@ -159,7 +190,7 @@ const currentShape = computed(() => {
   if (props.nodes.length === 0) {
     return ''
   }
-
+  
   const firstShape =
     props.nodes[0].data.shape ?? 'rounded-rectangle'
 
@@ -175,7 +206,15 @@ const currentShape = computed(() => {
 
 const activeTab = ref<'properties' | 'style'>('properties')
 
+function addCustomProperty(node : SkillGraphNode){
+  node.data.kvs.push({key : "" , value : ""})
 
+}
+
+function removeCustomProperty(node : SkillGraphNode ,idx : number){
+  node.data.kvs.splice(idx , 1);
+
+}
 </script>
 
 <template>
@@ -184,7 +223,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
            bg-slate-800 border-r border-slate-700 shadow-2xl
            z-20 transition-transform duration-0 ease-in-out
            p-5 flex flex-col text-slate-100"
-    :class="isOpen ? 'translate-x-0' : '-translate-x-full'"
+    :class="isOpen && !isNoNodeSelected() ? 'translate-x-0' : '-translate-x-full'"
   >
 
     <!-- 標題 -->
@@ -195,7 +234,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
       <h2 class="text-lg font-bold flex items-center gap-2">
         <span>⚙️</span>
 
-        <span v-if="isSingleNode()">
+        <span v-if="isSingleNodeSelected()">
           編輯天賦屬性
         </span>
 
@@ -286,8 +325,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
                 disabled:opacity-50
                 disabled:cursor-not-allowed"
           @change="
-            emit(
-              'update-node-id',
+            updateNodeId(
               ($event.target as HTMLInputElement).value
             )
           "
@@ -295,7 +333,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
       </div>
 
       <!-- ========================= -->
-      <!-- Label -->
+      <!-- Label(名稱) -->
       <!-- ========================= -->
 
       <div>
@@ -326,111 +364,193 @@ const activeTab = ref<'properties' | 'style'>('properties')
           "
         />
       </div>
+
+      <!-- ========================= -->
+      <!-- 天賦描述 -->
+      <!-- ========================= -->
       <div>
-      <label
-        class="text-xs font-semibold text-slate-400
-              uppercase tracking-wider block mb-1"
-      >
-        技能描述
-      </label>
 
-      <textarea
-        :value="getCommonValue('description')"
-        rows="4"
-        :placeholder="
-          nodes.length > 1 && getCommonValue('description') === ''
-            ? '多個 Node 的描述不同'
-            : '輸入技能描述...'
-        "
-        class="w-full px-3 py-2 bg-slate-900 rounded
-              border border-slate-700 text-slate-100
-              focus:outline-none focus:border-emerald-500
-              text-sm resize-none"
-        @input="
-          updateProperty(
-            'description',
-            ($event.target as HTMLTextAreaElement).value
-          )
-        "
-      />
-    </div>
+        
+        <label
+          class="text-xs font-semibold text-slate-400
+                uppercase tracking-wider block mb-1"
+        >
+          技能描述
+        </label>
 
-
-    <!-- ========================= -->
-    <!-- Cost Per Level -->
-    <!-- ========================= -->
-
-    <div>
-      <label
-        class="text-xs font-semibold text-slate-400
-              uppercase tracking-wider block mb-1"
-      >
-        每級技能點消耗
-      </label>
-
-      <input
-        :value="getCommonNumberValue('costPerLevel')"
-        type="number"
-        min="0"
-        step="1"
-        :placeholder="
-          nodes.length > 1 && getCommonNumberValue('costPerLevel') === ''
-            ? '多個 Node 的消耗不同'
-            : '例如：1'
-        "
-        class="w-full px-3 py-2 bg-slate-900 rounded
-              border border-slate-700 text-slate-100
-              focus:outline-none focus:border-emerald-500
-              text-sm"
-        @input="
-          updatePropertyNumber(
-            'costPerLevel',
-            Number(($event.target as HTMLInputElement).value)
-          )
-        "
-      />
-    </div>
+        <textarea
+          :value="getCommonValue('description')"
+          
+          rows="4"
+          :placeholder="
+            nodes.length > 1 && getCommonValue('description') === ''
+              ? '多個 Node 的描述不同'
+              : '輸入技能描述...'
+          "
+          class="w-full px-3 py-2 bg-slate-900 rounded
+                border border-slate-700 text-slate-100
+                focus:outline-none focus:border-emerald-500
+                text-sm resize-none"
+          @input="
+            updateProperty('description' , 
+            String(($event.target as HTMLInputElement).value))
+          "
+        />
+      </div>
 
 
-    <!-- ========================= -->
-    <!-- Max Level -->
-    <!-- ========================= -->
+      <!-- ========================= -->
+      <!-- Cost Per Level -->
+      <!-- ========================= -->
 
-    <div>
-      <label
-        class="text-xs font-semibold text-slate-400
-              uppercase tracking-wider block mb-1"
-      >
-        最大等級
-      </label>
+      <div>
+        <label
+          class="text-xs font-semibold text-slate-400
+                uppercase tracking-wider block mb-1"
+        >
+          每級技能點消耗
+        </label>
 
-      <input
-        :value="getCommonNumberValue('maxLevel')"
-        type="number"
-        min="1"
-        step="1"
-        :placeholder="
-          nodes.length > 1 && getCommonNumberValue('maxLevel') === ''
-            ? '多個 Node 的最大等級不同'
-            : '例如：5'
-        "
-        class="w-full px-3 py-2 bg-slate-900 rounded
-              border border-slate-700 text-slate-100
-              focus:outline-none focus:border-emerald-500
-              text-sm"
-        @input="
-          updatePropertyNumber(
-            'maxLevel',
-            Math.max(
-              1,
-              Number(($event.target as HTMLInputElement).value) || 1
+        <input
+          :value="getCommonNumberValue('costPerLevel')"
+          type="number"
+          min="0"
+          step="1"
+          :placeholder="
+            nodes.length > 1 && getCommonNumberValue('costPerLevel') === ''
+              ? '多個 Node 的消耗不同'
+              : '例如：1'
+          "
+          class="w-full px-3 py-2 bg-slate-900 rounded
+                border border-slate-700 text-slate-100
+                focus:outline-none focus:border-emerald-500
+                text-sm"
+          @input="
+            updatePropertyNumber(
+              'costPerLevel',
+              Number(($event.target as HTMLInputElement).value)
             )
-          )
-        "
-      />
-    </div>
+          "
+        />
+      </div>
+
+
+      <!-- ========================= -->
+      <!-- Max Level -->
+      <!-- ========================= -->
+
+      <div>
+        <label
+          class="text-xs font-semibold text-slate-400
+                uppercase tracking-wider block mb-1"
+        >
+          最大等級
+        </label>
+
+        <input
+          :value="getCommonNumberValue('maxLevel')"
+          type="number"
+          min="1"
+          step="1"
+          :placeholder="
+            nodes.length > 1 && getCommonNumberValue('maxLevel') === ''
+              ? '多個 Node 的最大等級不同'
+              : '例如：5'
+          "
+          class="w-full px-3 py-2 bg-slate-900 rounded
+                border border-slate-700 text-slate-100
+                focus:outline-none focus:border-emerald-500
+                text-sm"
+          @input="
+            updatePropertyNumber(
+              'maxLevel',
+              Math.max(
+                1,
+                Number(($event.target as HTMLInputElement).value) || 1
+              )
+            )
+          "
+        />
+      </div>
+
+
+      <div class="mt-4">
+        
+        <label
+          class="text-xs font-semibold text-slate-400
+                uppercase tracking-wider block mb-1"
+        >
+          自訂屬性
+        </label>
+        <div class="flex gap-2 px-2 text-[10px] text-slate-500 uppercase">
+          <span class="flex-1">Key</span>
+          <span class="flex-1">Value</span>
+          <span class="w-6"></span>
+        </div>
+        
+        <div
+          class="max-h-64 overflow-y-auto
+                pr-1 space-y-2"
+        >
+          <div
+            v-for="(property, index) in nodes[0].data.kvs"
+            :key="index"
+            class="flex gap-2"
+          >
+            <!-- Key -->
+            <input
+              v-model="property.key"
+              type="text"
+              placeholder="Key"
+              class="min-w-0 flex-1 px-2 py-2
+                    bg-slate-900 rounded
+                    border border-slate-700
+                    text-slate-100 text-sm
+                    focus:outline-none
+                    focus:border-emerald-500"
+            />
+
+            <!-- Value -->
+            <input
+              v-model="property.value"
+              type="text"
+              placeholder="Value"
+              class="min-w-0 flex-1 px-2 py-2
+                    bg-slate-900 rounded
+                    border border-slate-700
+                    text-slate-100 text-sm
+                    focus:outline-none
+                    focus:border-emerald-500"
+            />
+
+            <!-- Remove -->
+            <button
+              type="button"
+              class="px-2 text-slate-500
+                    hover:text-red-400"
+              @click="removeCustomProperty(nodes[0] , index)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="w-full mt-2 py-2
+                border border-dashed border-slate-700
+                rounded text-sm text-slate-400
+                hover:text-slate-200
+                hover:border-slate-500"
+          @click="addCustomProperty(nodes[0])"
+        >
+          + 新增屬性
+        </button>
+      </div>
     </div>
 
+
+    <!-- 樣式 -->
     <div v-else>
       <!-- Icon -->
       <!-- Shape -->
@@ -447,7 +567,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
           Icon SVG 檔名
         </label>
 
-        <input
+        <!-- input
           :value="iconValue()"
           type="text"
           placeholder="例如: sword.svg"
@@ -461,7 +581,7 @@ const activeTab = ref<'properties' | 'style'>('properties')
               ($event.target as HTMLInputElement).value
             )
           "
-        />
+        /-->
 
         <!-- Icon 選擇 -->
         <div

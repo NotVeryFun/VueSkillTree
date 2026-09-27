@@ -30,16 +30,12 @@ import { useSkillTreeIO } from './composables/UseSkillTreeIO'
 import { useSkillTreeSidebar } from './composables/UseSkillTreeSidebar'
 import { useSkillIcons } from './composables/UseSkillIcons'
 import {useSkillTreeSelection} from './composables/UseSkillTreeSelection'
-import type { SkillNodeData } from './type/SkillNode.ts'
 
 import { useSkillTreeHistory } from './composables/UseSkillTreeHistory'
 import { useSkillTreeKeyboard } from './composables/UseSkillTreeKeyboard'
 import {
   BACKGROUND_GAP,
   SNAP_GRID,
-  getNodeSize,
-  snapPosition,
-  topLeftToCenter,
 } from './utils/grid'
 
 const nodes = ref(initialNodes)
@@ -55,8 +51,6 @@ const edgeTypes = {
 const {
     getIntersectingNodes,
     screenToFlowCoordinate,
-    onNodeDragStop,
-    onSelectionDragStop,
     onNodesChange
   } = useVueFlow()
 
@@ -293,27 +287,6 @@ onUnmounted(() => {
 })
 
 
-
-const updateSelectedNodes = (
-  property: keyof SkillNodeData,
-  value: string
-) => {
-
-
-  selectedNodes.value.forEach(node => {
-    node.data[property] = value as never
-  })
-}
-
-const updateSelectedNodesNumberProperty = (
-  property: keyof SkillNodeData,
-  value: number
-) => {
-  selectedNodes.value.forEach(node => {
-    node.data[property] = value as never
-  })
-}
-
 const shapeOptions = [
   {
     value: 'rounded-rectangle',
@@ -355,35 +328,7 @@ const handleDoubleClick = (event: MouseEvent) => {
   addNodeByMousePosition(event)
 }
 
-const updateNodeId = (newId: string) => {
-  const trimmedId = newId.trim()
 
-  if (!trimmedId) {
-    return
-  }
-
-  const selectedIds =  new Set();
-
-
-  for(const node of selectedNodes.value){
-    selectedIds.add(node.id)
-  }
-
-  const duplicated = nodes.value.some(
-    node =>
-      node.id === trimmedId &&
-      !selectedIds.has(node.id)
-  )
-
-  if (duplicated) {
-    alert(`Node ID「${trimmedId}」已經存在。`)
-    return
-  }
-
-  selectedNodes.value.forEach(node => {
-    node.id = trimmedId
-  })
-}
 </script>
 
 <template>
@@ -405,9 +350,6 @@ const updateNodeId = (newId: string) => {
       :icon-url-map="iconUrlMap"
       :shape-options="shapeOptions"
       @close="closeSidebar"
-      @update-property = "updateSelectedNodes"
-      @update-property-number = "updateSelectedNodesNumberProperty"
-      @update-node-id="updateNodeId"
       
     />
     <div ref="flowContainer" class="w-full h-full">

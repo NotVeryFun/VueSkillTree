@@ -14,7 +14,8 @@ export const initialNodes: Node[] = [
       shape: 'rounded-rectangle',
 
       maxLevel: 2,
-      costPerLevel: 1
+      costPerLevel: 1,
+      kvs : []
       
     },
   },
@@ -30,7 +31,8 @@ export const initialNodes: Node[] = [
       shape: 'circle',
 
       maxLevel: 1,
-      costPerLevel: 1
+      costPerLevel: 1,
+      kvs : []
     },
   },
   {
@@ -45,7 +47,8 @@ export const initialNodes: Node[] = [
       shape: 'square',
 
       maxLevel: 1,
-      costPerLevel: 1
+      costPerLevel: 1,
+      kvs : []
     },
     
   },

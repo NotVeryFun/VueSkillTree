@@ -12,6 +12,9 @@ export interface SkillNodeData {
   icon?: string
   backgroundColor?: string
   shape?: SkillNodeShape
+
+  kvs : [{key : string , value : string}]
+
 }
 
 export type SkillGraphNode = GraphNode<SkillNodeData>
