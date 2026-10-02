@@ -140,7 +140,7 @@ const {
 
 
 const getIconSrc = (iconName?: string) => {
-  if(iconName == undefined || iconUrlMap[iconName] == undefined){return 'src/assets/SkillIcon/_1_Game/axe.svg'}
+  if(iconName == undefined || iconUrlMap[iconName] == undefined){console.log(`[SkillNode] Cannot find ${iconName}`);return 'src/assets/SkillIcon/_1_Game/axe.svg'}
   //console.log("[SkillNode] iconSrc: " + iconUrlMap[iconName])
   return iconUrlMap[iconName]
 }

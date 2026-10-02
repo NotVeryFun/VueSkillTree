@@ -290,15 +290,15 @@ onUnmounted(() => {
 const shapeOptions = [
   {
     value: 'rounded-rectangle',
-    label: '圓角矩形',
+    label: 'Rounded Rectangle',
   },
   {
     value: 'square',
-    label: '正方形',
+    label: 'Square',
   },
   {
     value: 'circle',
-    label: '圓形',
+    label: 'Circle',
   },
 ] satisfies {
   value: SkillNodeShape

@@ -10,8 +10,10 @@ export const initialNodes: Node[] = [
     height: DEFAULT_NODE_HEIGHT,
     data: {
       skill_id: '11',
-      label: '核心天賦：基礎體魄',
-      icon: 'axe.svg',
+      label: 'Attacker',
+      
+      icon: '_1_Game/axe.svg',
+      description: 'Damage +10%',
       shape: 'rounded-rectangle',
 
       maxLevel: 2,
@@ -28,8 +30,9 @@ export const initialNodes: Node[] = [
     height: DEFAULT_NODE_HEIGHT,
     data: {
       skill_id: '12',
-      label: '分支 A：力量狂暴',
-      icon: 'axe.svg',
+      label: 'Big Attacker',
+      icon: '_1_Game/axe.svg',
+      description: 'some +30% Damage',
       shape: 'circle',
 
       maxLevel: 1,
@@ -45,8 +48,9 @@ export const initialNodes: Node[] = [
     height: DEFAULT_NODE_HEIGHT,
     data: {
       skill_id: '13',
-      label: '分支 B：疾風步',
-      icon: 'axe.svg',
+      label: 'Swiftness',
+      icon: '_1_Game/axe.svg',
+      description: '+30% Attack Speed',
       shape: 'square',
 
       maxLevel: 1,

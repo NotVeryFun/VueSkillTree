@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  PanelLeft,
   Network,
   Save,
   Gamepad2,
@@ -100,33 +99,6 @@ const handleFileChange = (event: Event) => {
     <div class="flex items-center gap-3">
 
       <!-- Sidebar -->
-      <button
-        class="
-          w-9
-          h-9
-
-          flex
-          items-center
-          justify-center
-
-          rounded-lg
-
-          text-slate-300
-
-          hover:text-white
-          hover:bg-slate-700
-
-          border
-          border-transparent
-          hover:border-slate-600
-
-          transition
-        "
-        title="切換側邊欄"
-        @click="emit('toggle-sidebar')"
-      >
-        <PanelLeft :size="18" />
-      </button>
 
 
       <div class="h-5 w-px bg-slate-700" />
@@ -148,7 +120,7 @@ const handleFileChange = (event: Event) => {
             text-slate-100
           "
         >
-          天賦樹編輯器
+          Skill Editor
         </span>
 
       </div>
@@ -191,13 +163,13 @@ const handleFileChange = (event: Event) => {
 
           transition
         "
-        title="儲存完整的 Vue Flow 編輯器資料"
+        title="Save Editor data"
         @click="emit('export-json')"
       >
         <Save :size="15" />
 
         <span>
-          儲存編輯器
+          Save Editor Data
         </span>
       </button>
 
@@ -229,13 +201,13 @@ const handleFileChange = (event: Event) => {
 
           shadow-sm
         "
-        title="匯出給遊戲引擎使用的 Skill Tree JSON"
+        title="Export Skill Tree JSON Data"
         @click="emit('export-game-data')"
       >
         <Gamepad2 :size="15" />
 
         <span>
-          匯出遊戲資料
+          Export Game Data
         </span>
       </button>
 
@@ -274,13 +246,13 @@ const handleFileChange = (event: Event) => {
 
           shadow-sm
         "
-        title="載入之前儲存的編輯器 JSON"
+        title="Load editor state from saved editor data"
         @click="triggerFileInput"
       >
         <Upload :size="15" />
 
         <span>
-          匯入編輯器
+          Import Editor Data
         </span>
       </button>
 

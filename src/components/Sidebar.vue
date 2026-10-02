@@ -161,7 +161,7 @@ const updateNodeId = (newId: string) => {
   )
 
   if (duplicated) {
-    alert(`Node ID「${trimmedId}」已經存在。`)
+    alert(`Node ID ${trimmedId} already existed , please choose another id.`)
     return
   }
 
@@ -243,11 +243,11 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         <span>⚙️</span>
 
         <span v-if="isSingleNodeSelected()">
-          編輯天賦屬性
+          Edit Skill
         </span>
 
         <span v-else>
-          編輯 {{ nodes.length }} 個天賦
+          Edit {{ nodes.length }} Skills
         </span>
       </h2>
 
@@ -270,7 +270,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         "
         @click="activeTab = 'properties'"
       >
-        屬性
+        Property
       </button>
 
       <button
@@ -283,7 +283,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         "
         @click="activeTab = 'style'"
       >
-        樣式
+        Style
       </button>
     </div>
 
@@ -294,7 +294,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
       class="flex-1 flex items-center justify-center
              text-slate-500 text-sm"
     >
-      尚未選取天賦
+      No Skill Selected
     </div>
 
     <!-- 有選取 Node -->
@@ -314,7 +314,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                 uppercase tracking-wider block mb-1"
         >
-          Node ID
+          Skill ID
         </label>
 
         <input
@@ -323,8 +323,8 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           :disabled="nodes.length !== 1"
           :placeholder="
             nodes.length > 1
-              ? '多選時無法修改 Node ID'
-              : '例如：fireball'
+              ? 'Cannot edit Skill ID'
+              : 'Example：fireball'
           "
           class="w-full px-3 py-2 bg-slate-900 rounded
                 border border-slate-700 text-slate-100
@@ -349,7 +349,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                  uppercase tracking-wider block mb-1"
         >
-          天賦名稱 (Label)
+          Name
         </label>
 
         <input
@@ -357,7 +357,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           type="text"
           :placeholder="
             nodes.length > 1 && labelValue() === ''
-              ? '多個 Node 的名稱不同'
+              ? 'Skills have different name'
               : ''
           "
           class="w-full px-3 py-2 bg-slate-900 rounded
@@ -383,7 +383,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                 uppercase tracking-wider block mb-1"
         >
-          技能描述
+          Description
         </label>
 
         <textarea
@@ -392,8 +392,8 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           rows="4"
           :placeholder="
             nodes.length > 1 && getCommonValue('description') === ''
-              ? '多個 Node 的描述不同'
-              : '輸入技能描述...'
+              ? 'Skills have different description'
+              : 'Skill Description...'
           "
           class="w-full px-3 py-2 bg-slate-900 rounded
                 border border-slate-700 text-slate-100
@@ -416,7 +416,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                 uppercase tracking-wider block mb-1"
         >
-          每級技能點消耗
+          Cost per skill level
         </label>
 
         <input
@@ -426,8 +426,8 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           step="1"
           :placeholder="
             nodes.length > 1 && getCommonNumberValue('costPerLevel') === ''
-              ? '多個 Node 的消耗不同'
-              : '例如：1'
+              ? 'Skills have different cost'
+              : 'Example：1'
           "
           class="w-full px-3 py-2 bg-slate-900 rounded
                 border border-slate-700 text-slate-100
@@ -452,7 +452,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                 uppercase tracking-wider block mb-1"
         >
-          最大等級
+          Max Level
         </label>
 
         <input
@@ -462,8 +462,8 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           step="1"
           :placeholder="
             nodes.length > 1 && getCommonNumberValue('maxLevel') === ''
-              ? '多個 Node 的最大等級不同'
-              : '例如：5'
+              ? 'Skills have different Max Level'
+              : 'Example'
           "
           class="w-full px-3 py-2 bg-slate-900 rounded
                 border border-slate-700 text-slate-100
@@ -488,7 +488,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                 uppercase tracking-wider block mb-1"
         >
-          自訂屬性
+          Custom Property
         </label>
         <div class="flex gap-2 px-2 text-[10px] text-slate-500 uppercase">
           <span class="flex-1">Key</span>
@@ -552,7 +552,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
                 hover:border-slate-500"
           @click="addCustomProperty(nodes[0])"
         >
-          + 新增屬性
+          + Add Custom Property
         </button>
       </div>
     </div>
@@ -609,7 +609,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         <label
           class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1"
         >
-          節點形狀
+          Shape
         </label>
 
         <div
@@ -680,7 +680,7 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
           class="text-xs font-semibold text-slate-400
                  uppercase tracking-wider block mb-1"
         >
-          節點顏色
+          Color
         </label>
 
         <div class="flex items-center gap-2 mb-3">
