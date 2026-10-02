@@ -33,8 +33,9 @@ const getIconUrl = (iconName: string) => {
   if (props.iconUrlMap?.[iconName]) {
     return props.iconUrlMap[iconName]
   }
-
-  return `/SkillIcon/_1_Game/${iconName}`
+  console.log(iconName)
+  //iconName由 前面的資料夾和後面的檔案名稱所構成，如_1_Game/axe.svg
+  return `/SkillIcon/${iconName}`
 }
 
 /**
@@ -64,7 +65,7 @@ const isNoNodeSelected = () => {
 const getCommonValue = (
   property: keyof SkillNodeData
 ): string => {
-  console.log(props.nodes.length)
+  //console.log(props.nodes.length)
   if (props.nodes.length === 0) {
     return ''
   }
@@ -573,23 +574,6 @@ function removeCustomProperty(node : SkillGraphNode ,idx : number){
         >
           Icon
         </label>
-
-        <!-- input
-          :value="iconValue()"
-          type="text"
-          placeholder="例如: sword.svg"
-          class="w-full px-3 py-2 bg-slate-900 rounded
-                 border border-slate-700 text-slate-100
-                 focus:outline-none focus:border-emerald-500
-                 text-sm mb-3"
-          @input="
-            updateProperty(
-              'icon',
-              ($event.target as HTMLInputElement).value
-            )
-          "
-        /-->
-
         <!-- Icon 選擇 -->
         <div
           class="grid grid-cols-5 gap-2 max-h-80

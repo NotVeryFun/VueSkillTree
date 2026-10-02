@@ -425,6 +425,25 @@ const handleDoubleClick = (event: MouseEvent) => {
         
       />
     </div>
+    <div
+      class="
+        absolute
+        right-4
+        bottom-4
+        z-50
+        rounded-lg
+        border
+        px-2
+        py-1
+        text-sm
+        shadow-md
+      "
+    >
+
+      <div class="text-gray-300 text-[10px]">
+        v0.1.0 alpha
+      </div>
+    </div>
 
   </div>
 </template>

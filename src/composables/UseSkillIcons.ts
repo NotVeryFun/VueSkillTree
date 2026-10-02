@@ -12,15 +12,13 @@ export function useSkillIcons() {
 
 
   const iconOptions = Object.keys(gameModules)
-    .map(path => path.split('/').pop() || '')
+    .map(path => GetIconPath(path))
 
   const iconUrlMap: Record<string, string> = {}
 
   for (const path in gameModules) {
-    const fileName =
-      path.split('/').pop() || ''
-
-    iconUrlMap[fileName] =
+    const icon_path = GetIconPath(path)
+    iconUrlMap[icon_path] =
       gameModules[path].default
   }
 
@@ -28,4 +26,12 @@ export function useSkillIcons() {
     iconOptions,
     iconUrlMap,
   }
+}
+
+function GetIconPath(path : string){
+  
+  const splited = path.split('/');
+    const fileName =
+      splited[splited.length - 2] + "/" + splited[splited.length - 1] || ''
+  return  fileName;
 }

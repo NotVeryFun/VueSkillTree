@@ -5,6 +5,7 @@ import { Handle, Position, type NodeProps} from '@vue-flow/core'
 import { NodeResizer } from '@vue-flow/node-resizer'
 import '@vue-flow/node-resizer/dist/style.css'
 import type { SkillNodeData } from '../type/SkillNode'
+import { useSkillIcons } from '../composables/UseSkillIcons'
 
 
 export type SkillNodeShape =
@@ -132,26 +133,20 @@ const handlePlusPointerDown = (
 // SVG
 // ============================================================
 
-const svgModules = import.meta.glob<{ default: string }>(
-  '../assets/SkillIcon/_1_Game/*.svg',
-  {
-    eager: true,
-  }
-)
+const {
+  iconUrlMap
+
+} = useSkillIcons()
+
 
 const getIconSrc = (iconName?: string) => {
-  if (!iconName) return ''
-
-  const matchKey = Object.keys(svgModules).find((key) =>
-    key.endsWith(`/${iconName}`)
-  )
-
-  if (matchKey) {
-    return svgModules[matchKey].default
-  }
-
-  return `/SkillIcon/_1_Game/${iconName}`
+  if(iconName == undefined || iconUrlMap[iconName] == undefined){return 'src/assets/SkillIcon/_1_Game/axe.svg'}
+  //console.log("[SkillNode] iconSrc: " + iconUrlMap[iconName])
+  return iconUrlMap[iconName]
 }
+
+
+
 
 const shapeClass = computed(() => {
   switch (props.data.shape) {
