@@ -198,8 +198,8 @@ export function useSkillTreeActions(
         position: snappedTopLeft,
 
         data: {
-          label: '新天賦節點',
-          icon: 'axe.svg',
+          label: 'New Skill Node',
+          icon: '_1_Game/axe.svg',
 
           maxLevel: 1,
           costPerLevel: 1,

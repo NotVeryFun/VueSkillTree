@@ -52,7 +52,7 @@ defineProps<SkillNodeTooltipProps>()
         mb-2
       "
     >
-      {{ label || '未命名技能' }}
+      {{ label || 'Unnamed skill' }}
     </div>
 
     <!-- Description -->
@@ -65,7 +65,7 @@ defineProps<SkillNodeTooltipProps>()
         whitespace-pre-line
       "
     >
-      {{ description || '尚無技能描述' }}
+      {{ description || 'No Skill Description Yet' }}
     </div>
 
     <!-- 分隔線 -->
@@ -85,7 +85,7 @@ defineProps<SkillNodeTooltipProps>()
       <!-- 技能點 -->
       <div class="flex items-center gap-1">
         <span class="text-slate-400">
-          技能點
+          Skill Point
         </span>
 
         <span class="font-bold text-amber-400">
