@@ -14,6 +14,7 @@ import {
   topLeftToCenter,
 } from '../utils/grid'
 import type { SkillGraphNode, SkillNodeCustomProperty } from '../type/SkillNode'
+import { makeDefaultNode } from '../data/SkillTree'
 
 export function useSkillTreeActions(
   onBeforeChange?: () => void
@@ -186,26 +187,11 @@ export function useSkillTreeActions(
     )
 
     const id = createNodeId()
+
+    const newNode = makeDefaultNode(id , snappedTopLeft)
     onBeforeChange?.()
     addNodes([
-      {
-        id,
-
-        type: 'custom',
-        width: DEFAULT_NODE_WIDTH,
-        height: DEFAULT_NODE_HEIGHT,
-
-        position: snappedTopLeft,
-
-        data: {
-          label: 'New Skill Node',
-          icon: '_1_Game/axe.svg',
-
-          maxLevel: 1,
-          costPerLevel: 1,
-          
-        },
-      },
+      newNode
     ])
   }
 

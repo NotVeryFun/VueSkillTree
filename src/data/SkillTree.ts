@@ -1,6 +1,27 @@
-import type { Node, Edge } from '@vue-flow/core'
+import type { Node, Edge, XYPosition } from '@vue-flow/core'
 import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from '../utils/grid'
+export function makeDefaultNode(id : string , position : XYPosition) {
+  
+    return {id,
 
+    type: 'custom',
+    width: DEFAULT_NODE_WIDTH,
+    height: DEFAULT_NODE_HEIGHT,
+
+    position: position,
+
+    data: {
+      label: 'New Skill',
+      icon: '_1_Game/axe.svg',
+
+      maxLevel: 1,
+      costPerLevel: 1,
+      
+    }}
+      
+
+
+}
 export const initialNodes: Node[] = [
   {
     id: '1',
