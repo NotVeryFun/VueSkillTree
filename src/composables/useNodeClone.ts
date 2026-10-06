@@ -9,7 +9,9 @@ function createNodeId(){
 
 export function cloneNode(sourceNode : SkillGraphNode , position : XYPosition){
     const id = createNodeId()
-
+    if(sourceNode.data.kvs == undefined){
+        sourceNode.data.kvs = []
+    }
     const newNode = {
         ...sourceNode,
         id:id,

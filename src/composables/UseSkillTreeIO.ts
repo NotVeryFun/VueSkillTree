@@ -99,11 +99,11 @@ export function useSkillTreeIO() {
           }
 
           if(data.column_number_skill_cost_per_level >= 0){
-            n.data.description = r[data.column_number_skill_cost_per_level - 1];
+            n.data.costPerLevel = Number(r[data.column_number_skill_cost_per_level - 1]);
           }
 
           if(data.column_number_skill_max_level >= 0){
-            n.data.description = r[data.column_number_skill_max_level - 1];
+            n.data.maxLevel = Number(r[data.column_number_skill_max_level - 1]);
           }
 
           if(data.column_number_skill_kvs_start >= 0){

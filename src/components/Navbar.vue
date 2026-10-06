@@ -145,7 +145,7 @@ import Button from './ui/button/Button.vue';
 
 
 
-      <Dialog v-model:open="isTSVImportOpen">
+      <Dialog v-model:open="isTSVImportOpen" :unmount-on-hide="false">
         <DialogTrigger as-child>
           <OpenFileTSVImportTrigger></OpenFileTSVImportTrigger>
           <!--LoadFileTSVDataData
