@@ -1,136 +1,91 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import {
-  Network,
-  Save,
-  Gamepad2,
-  Upload,
-} from 'lucide-vue-next'
-import type { GraphEdge, GraphNode } from '@vue-flow/core';
-import type { SkillGraphNode } from '../type/SkillNode';
+  import {
+    Network,
+    Save,
+    Gamepad2,
+    Import,
+  } from 'lucide-vue-next'
+  import type { GraphEdge } from '@vue-flow/core';
+  import type { SkillGraphNode } from '../type/SkillNode';
+  import LoadFileJsonEditorData from './LoadFile/LoadFileJsonEditorData.vue';
+  import Dialog from './ui/dialog/Dialog.vue';
+  import DialogTrigger from './ui/dialog/DialogTrigger.vue';
+  import DialogContent from './ui/dialog/DialogContent.vue';
+import DialogHeader from './ui/dialog/DialogHeader.vue';
+import DialogFooter from './ui/dialog/DialogFooter.vue';
+import ImportTSVDialogContent from './LoadFile/ImportTSVDialogContent.vue';
+import DialogTitle from './ui/dialog/DialogTitle.vue';
+import OpenFileTSVImportTrigger from './LoadFile/OpenFileTSVImportTrigger.vue';
+import { ref } from 'vue';
+import { toast } from 'vue-sonner';
+import type { ImportTSVDataSettings } from '@/type/ImportTSVSettings.ts';
+import Button from './ui/button/Button.vue';
 
-const emit = defineEmits<{
-  (e: 'toggle-sidebar'): void
-  (e: 'export-json'): void
-  (e: 'export-game-data'): void
-  (e: 'import-json', data: { nodes: GraphNode<SkillGraphNode>[]; edges: GraphEdge[] }): void
-}>()
 
-const fileInputRef = ref<HTMLInputElement | null>(null)
+  const emit = defineEmits<{
+    (e: 'toggle-sidebar'): void
+    (e: 'export-json'): void
+    (e: 'export-game-data'): void
+    (e: 'import-json', data: { nodes: SkillGraphNode[]; edges: GraphEdge[] }): void
+    (e: 'import-tsv', data: ImportTSVDataSettings): void
+  }>()
 
-// ============================================================
-// 匯入
-// ============================================================
+  const isTSVImportOpen = ref(false);
 
-const triggerFileInput = () => {
-  fileInputRef.value?.click()
-}
-
-const handleFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-
-  if (!file) return
-
-  const reader = new FileReader()
-
-  reader.onload = (e) => {
-
-    try {
-
-      const parsedData = JSON.parse(
-        e.target?.result as string
-      )
-
-      if (
-        Array.isArray(parsedData.nodes) &&
-        Array.isArray(parsedData.edges)
-      ) {
-
-        emit('import-json', parsedData)
-
-      } else {
-
-        alert(
-          '無效的編輯器 JSON 格式！\n\n' +
-          '請確保 JSON 包含 nodes 與 edges 陣列。'
-        )
-
-      }
-
-    } catch {
-
-      alert(
-        '解析 JSON 檔案失敗，請檢查檔案格式。'
-      )
-
-    }
-
+  function sendTSVImportedToast(){
+    toast('TSV Data has been imported!', {
+        description: 'TSV data applied to skill nodes.',
+        duration: 4000,
+        icon: Import
+      })
   }
-
-  reader.readAsText(file)
-
-  // 確保下次選同一個檔案仍會觸發 change
-  target.value = ''
-}
 </script>
 
 <template>
+  <nav class="
+    fixed
+    top-0
+    left-0
 
-  <header
-    class="
-      absolute top-0 left-0 right-0
-      z-50
-      bg-slate-900/90
-      backdrop-blur-md
-      border-b border-slate-700/80
-      px-4
-      flex items-center justify-between
-      text-slate-100
-      shadow-lg
-    "
-    style="height: 56px; min-height: 56px;"
-  >
+    w-full
+    h-12
 
+    flex
+    justify-between
+    items-center
+
+    bg-background/20
+    backdrop-blur-md
+    z-50
+    py-0.5
+    px-6
+  ">
     <!-- ====================================================== -->
     <!-- 左側 -->
     <!-- ====================================================== -->
 
-    <div class="flex items-center gap-3">
 
-      <!-- Sidebar -->
+    <!-- Logo / Title -->
+    <div class="flex items-center gap-2.5">
 
+      <Network
+        :size="19"
+        class="text-emerald-400"
+      />
 
-      <div class="h-5 w-px bg-slate-700" />
-
-
-      <!-- Logo / Title -->
-      <div class="flex items-center gap-2.5">
-
-        <Network
-          :size="19"
-          class="text-emerald-400"
-        />
-
-        <span
-          class="
-            font-semibold
-            text-sm
-            tracking-wide
-            text-slate-100
-          "
-        >
-          Skill Editor
-        </span>
-
-      </div>
-
+      <span
+        class="
+          font-semibold
+          text-sm
+          tracking-wide
+          text-slate-100
+            truncate
+        "
+      >
+        Skill Editor
+      </span>
     </div>
 
-
-    <!-- ====================================================== -->
-    <!-- 右側 -->
-    <!-- ====================================================== -->
 
     <div class="flex items-center gap-2">
 
@@ -138,28 +93,23 @@ const handleFileChange = (event: Event) => {
       <!-- 儲存編輯器 -->
       <!-- ================================================== -->
 
-      <button
+      <Button
         class="
-          h-9
-          px-3
-
+          h-full
           flex
           items-center
           gap-2
 
           rounded-lg
 
-          bg-slate-800
-          hover:bg-slate-700
-
-          border
-          border-slate-700
-          hover:border-slate-600
-
-          text-slate-200
-
           text-xs
           font-medium
+
+          bg-muted
+          text-foreground
+
+          hover:bg-foreground
+          hover:text-background
 
           transition
         "
@@ -171,19 +121,63 @@ const handleFileChange = (event: Event) => {
         <span>
           Save Editor Data
         </span>
-      </button>
+      </Button>
 
 
       <!-- ================================================== -->
       <!-- 匯出遊戲資料 -->
       <!-- ================================================== -->
 
-      <button
-        class="
-          h-9
-          px-3
+      
 
-          flex
+
+      <!--
+        匯入TSV檔案，將Data改變
+      -->
+
+      <LoadFileJsonEditorData
+      
+        @import-data="(data) => emit('import-json' , data)"
+        >
+      </LoadFileJsonEditorData>
+
+
+
+
+
+      <Dialog v-model:open="isTSVImportOpen">
+        <DialogTrigger as-child>
+          <OpenFileTSVImportTrigger></OpenFileTSVImportTrigger>
+          <!--LoadFileTSVDataData
+          
+          
+          @import-tsv-data="(data) => emit('import-tsv' , data)">
+
+          </LoadFileTSVDataData-->
+        </DialogTrigger>
+        <DialogContent class="">
+          
+            <DialogHeader>
+              <DialogTitle>
+                Import Settings
+              </DialogTitle>
+            </DialogHeader>
+            
+              <ImportTSVDialogContent @import-tsv-data="(data) => {isTSVImportOpen = false ;sendTSVImportedToast(); emit('import-tsv' , data)}">
+
+
+              </ImportTSVDialogContent>
+            
+            <DialogFooter>
+
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Button
+        class="
+          h-full
+          flex flex-nowrap
           items-center
           gap-2
 
@@ -200,75 +194,18 @@ const handleFileChange = (event: Event) => {
           transition
 
           shadow-sm
+          
         "
         title="Export Skill Tree JSON Data"
         @click="emit('export-game-data')"
       >
         <Gamepad2 :size="15" />
 
-        <span>
+        <span class=" truncate">
           Export Game Data
         </span>
-      </button>
-
-
-      <!-- ================================================== -->
-      <!-- 分隔線 -->
-      <!-- ================================================== -->
-
-      <div class="h-5 w-px bg-slate-700 mx-1" />
-
-
-      <!-- ================================================== -->
-      <!-- 匯入編輯器 -->
-      <!-- ================================================== -->
-
-      <button
-        class="
-          h-9
-          px-3
-
-          flex
-          items-center
-          gap-2
-
-          rounded-lg
-
-          bg-blue-600
-          hover:bg-blue-500
-
-          text-white
-
-          text-xs
-          font-semibold
-
-          transition
-
-          shadow-sm
-        "
-        title="Load editor state from saved editor data"
-        @click="triggerFileInput"
-      >
-        <Upload :size="15" />
-
-        <span>
-          Import Editor Data
-        </span>
-      </button>
-
-
-      <!-- Hidden File Input -->
-
-      <input
-        ref="fileInputRef"
-        type="file"
-        accept=".json"
-        class="hidden"
-        @change="handleFileChange"
-      />
-
+      </Button>
     </div>
-
-  </header>
+  </nav>
 
 </template>

@@ -198,7 +198,7 @@ const shapeClass = computed(() => {
     <div
       class="relative w-full h-full flex flex-col items-center justify-center p-3
        bg-teal-800 text-white transition-colors 
-      min-w-[64px] min-h-[64px] box-border
+      min-w-16 min-h-16 box-border
       
       
       
@@ -250,13 +250,13 @@ const shapeClass = computed(() => {
             <!-- 白色虛線選取框 --> 
             <div
             v-if="selected"
-            class="absolute inset-[-15px] border border-dashed border-white pointer-events-none z-10"
+            class="absolute -inset-3.75 border border-dashed border-white pointer-events-none z-10"
             />
 
               <div
                 class="w-[50%] aspect-square
-                      min-w-[40px]
-                      max-w-[100px]
+                      min-w-10
+                      max-w-25
                       flex items-center justify-center
                       "
               >
@@ -340,7 +340,6 @@ const shapeClass = computed(() => {
             py-1
 
             flex
-            bg-yellow-800
 
             bg-slate-950/60
             border

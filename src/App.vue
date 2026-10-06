@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, markRaw , onMounted, onUnmounted } from 'vue'
+import { ref, markRaw , onMounted, onUnmounted, computed } from 'vue'
 import {
   MarkerType,
   SelectionMode,
@@ -15,10 +15,10 @@ import './style.css'
 
 import SkillNode, { type SkillNodeShape } from './components/SkillNode.vue'
 import Navbar from './components/Navbar.vue'
-import Sidebar from './components/Sidebar.vue'
 import FloatingEdge from './components/FloatingEdge.vue'
 import SkillNodeTooltip from './components/SkillNodeTooltip.vue'
-
+import { Toaster } from '@/components/ui/sonner'
+import 'vue-sonner/style.css'
 import {
   initialNodes,
   initialEdges,
@@ -27,7 +27,6 @@ import {
 import { useSkillConnection } from './composables/UseSkillConnection'
 import { useSkillTreeActions } from './composables/UseSkillTreeActions'
 import { useSkillTreeIO } from './composables/UseSkillTreeIO'
-import { useSkillTreeSidebar } from './composables/UseSkillTreeSidebar'
 import { useSkillIcons } from './composables/UseSkillIcons'
 import {useSkillTreeSelection} from './composables/UseSkillTreeSelection'
 
@@ -37,6 +36,14 @@ import {
   BACKGROUND_GAP,
   SNAP_GRID,
 } from './utils/grid'
+import NodePropertySidebar from './components/NodePropertySidebar.vue'
+import Sidebar from './components/ui/sidebar/Sidebar.vue'
+import SidebarProvider from './components/ui/sidebar/SidebarProvider.vue'
+import SidebarContent from './components/ui/sidebar/SidebarContent.vue'
+import SidebarGroup from './components/ui/sidebar/SidebarGroup.vue'
+import SidebarGroupContent from './components/ui/sidebar/SidebarGroupContent.vue'
+import SidebarMenu from './components/ui/sidebar/SidebarMenu.vue'
+import SidebarMenuItem from './components/ui/sidebar/SidebarMenuItem.vue'
 
 const nodes = ref(initialNodes)
 const edges = ref(initialEdges)
@@ -88,14 +95,10 @@ const {
 const {
   exportToJson,
   importFromJson,
+  importTSVData,
   exportGameData
-} = useSkillTreeIO()
 
-const {
-  isOpen: isSidebarOpen,
-  close: closeSidebar,
-  toggle: toggleSidebar,
-} = useSkillTreeSidebar()
+} = useSkillTreeIO()
 
 const {
   iconOptions,
@@ -246,16 +249,24 @@ const {
 
 
 const presetColors = [
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#84cc16',
-  '#10b981',
-  '#06b6d4',
-  '#3b82f6',
-  '#6366f1',
-  '#a855f7',
-  '#ec4899',
+  '#dc2626', // Red
+  '#ea580c', // Red-Orange
+  '#f97316', // Orange
+  '#d97706', // Amber
+  '#ca8a04', // Yellow
+  '#84a600', // Lime
+  '#65a30d', // Green-Yellow
+  '#16a34a', // Green
+  '#059669', // Emerald
+  '#0d9488', // Teal
+  '#0891b2', // Cyan
+  '#0284c7', // Sky
+  '#2563eb', // Blue
+  '#4f46e5', // Indigo
+  '#7c3aed', // Violet
+  '#9333ea', // Purple
+  '#c026d3', // Fuchsia
+  '#db2777', // Pink
 ]
 
 
@@ -327,125 +338,152 @@ const handleDoubleClick = (event: MouseEvent) => {
   saveHistory();
   addNodeByMousePosition(event)
 }
+const sidebarOpen = computed(() => {
+  return selectedNodes.value.length > 0
 
+})
+/*
+   
 
+*/
 </script>
 
 <template>
-  <div class="fixed inset-0 flex flex-col overflow-hidden bg-slate-900 font-sans">
-
+    <div class=" h-screen overflow-hidden "></div>
     <Navbar
-      @toggle-sidebar="toggleSidebar"
-      @export-json="exportToJson"
-      @export-game-data="exportGameData"
-      @import-json="importFromJson"
-    />
-
-    <Sidebar
-      :is-open="isSidebarOpen"
-      :nodes="selectedNodes"
-      :selected-nodes="selectedNodes"
-      :icon-options="iconOptions"
-      :preset-colors="presetColors"
-      :icon-url-map="iconUrlMap"
-      :shape-options="shapeOptions"
-      @close="closeSidebar"
-      
-    />
-    <div ref="flowContainer" class="w-full h-full">
-      <VueFlow
-        v-model:nodes="nodes"
-        v-model:edges="edges"
-        :node-types="nodeTypes"
-        :edge-types="edgeTypes"
-        :default-edge-options="{
-          type: 'floating',
-          markerEnd: MarkerType.ArrowClosed
-        }"
-        fit-view-on-init
-        
-        class="w-full h-full"
-
-        :pan-on-drag="[1]"
-
-        :selection-mode="SelectionMode.Partial"
-        :selection-on-drag="true"
-        :selection-key-code="true"
-        :edges-focusable="true"
-        
-        
-
-        :elements-selectable="true"
-        :nodes-focusable="false"
-
-
-
-        :zoom-on-double-click="false"
-        :select-nodes-on-drag="false"
-        :elevate-nodes-on-select="false"
-
-
-        :snap-to-grid="true"
-        :snap-grid="SNAP_GRID"
-        :multi-selection-key-code="'shift'"
-        
-      
-        
-      >
-        <template #node-custom="nodeProps">
-          <SkillNode
-            v-bind="nodeProps"
-            @add-node-from-handle="addNodeFromHandle"
-            @start-skill-connection="startSkillConnection"
-            @hover="handleNodeHover"
-            @leave="handleNodeLeave"
-            @select="updateSelectionSelectedNodes"
-            
-            
-          />
-        </template>
-        <Background 
-        :variant="BackgroundVariant.Dots"
-        :gap="BACKGROUND_GAP"
-        :size="3"
-        :offset="[1.5,1.5]"
-        
-        />
-      </VueFlow>
-      <SkillNodeTooltip
-        :visible="tooltip.visible"
-        :x="tooltip.x"
-        :y="tooltip.y"
-        :label="tooltip.node?.label"
-        :description="tooltip.node?.description"
-
-        :cost-per-level="tooltip.node?.costPerLevel"
-        :max-level="tooltip.node?.maxLevel"
-        :current-level="tooltip.node?.currentLevel"
-        
+        @export-json="exportToJson"
+        @export-game-data="exportGameData"
+        @import-json="importFromJson"
+        @import-tsv="importTSVData"
       />
-    </div>
-    <div
-      class="
-        absolute
-        right-4
-        bottom-4
-        z-50
-        rounded-lg
-        border
-        px-2
-        py-1
-        text-sm
-        shadow-md
-      "
-    >
+    <SidebarProvider v-model:open="sidebarOpen">
+    <main class="fixed inset-0 flex flex-col overflow-hidden font-sans w-full">
+        <Sidebar side="left" variant="inset"  class="top-12 h-[calc(100vh-3rem)]">
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <NodePropertySidebar
+                      :is-open="sidebarOpen"
+                      :nodes="selectedNodes"
+                      :selected-nodes="selectedNodes"
+                      :icon-options="iconOptions"
+                      :preset-colors="presetColors"
+                      :icon-url-map="iconUrlMap"
+                      :shape-options="shapeOptions"
+                      @close="() => {}"
+                      
+                    />
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+        </Sidebar>
+      
+      
+      <div class="absolute inset-0">
+        
+        <VueFlow
+          v-model:nodes="nodes"
+          v-model:edges="edges"
+          :node-types="nodeTypes"
+          :edge-types="edgeTypes"
+          :default-edge-options="{
+            type: 'floating',
+            markerEnd: MarkerType.ArrowClosed
+          }"
+          fit-view-on-init
+          
+          class=" w-full h-full"
 
-      <div class="text-gray-300 text-[10px]">
-        v0.1.0 alpha
+          :pan-on-drag="[1]"
+
+          :selection-mode="SelectionMode.Partial"
+          :selection-on-drag="true"
+          :selection-key-code="true"
+          :edges-focusable="true"
+          
+          
+
+          :elements-selectable="true"
+          :nodes-focusable="false"
+
+
+
+          :zoom-on-double-click="false"
+          :select-nodes-on-drag="false"
+          :elevate-nodes-on-select="false"
+
+
+          :snap-to-grid="true"
+          :snap-grid="SNAP_GRID"
+          :multi-selection-key-code="'shift'"
+          
+        
+          
+        >
+          <template #node-custom="nodeProps">
+            <SkillNode
+              v-bind="nodeProps"
+              @add-node-from-handle="addNodeFromHandle"
+              @start-skill-connection="startSkillConnection"
+              @hover="handleNodeHover"
+              @leave="handleNodeLeave"
+              @select="updateSelectionSelectedNodes"
+              
+              
+            />
+          </template>
+          <Background 
+          :variant="BackgroundVariant.Dots"
+          :gap="BACKGROUND_GAP"
+          :size="3"
+          :offset="[1.5,1.5]"
+          class="dark"
+          
+          />
+        </VueFlow>
+        
+        <SkillNodeTooltip
+          :visible="tooltip.visible"
+          :x="tooltip.x"
+          :y="tooltip.y"
+          :label="tooltip.node?.label"
+          :description="tooltip.node?.description"
+
+          :cost-per-level="tooltip.node?.costPerLevel"
+          :max-level="tooltip.node?.maxLevel"
+          :current-level="tooltip.node?.currentLevel"
+          
+        />
       </div>
-    </div>
+      <div
+        class="
+          absolute
+          right-4
+          bottom-4
+          z-50
+          rounded-lg
+          border
+          px-2
+          py-1
+          text-sm
+          shadow-md
+        "
+      >
 
-  </div>
+        <div class="text-[10px]">
+          v0.2.0 alpha
+        </div>
+      </div>
+      
+    </main>
+    <Toaster class="w-full"/>
+    </SidebarProvider>
+  
+  
 </template>
 
 <style scoped>
@@ -457,7 +495,7 @@ body {
   overflow: hidden;
 }
 :deep(.vue-flow__selection) {
-  background-color: rgba(59, 130, 246, 0.12) !important;
+  /*background-color: rgba(59, 130, 246, 0.12) !important;*/
   border: 1.5px dashed #60a5fa !important;
   border-radius: 6px !important;
 }

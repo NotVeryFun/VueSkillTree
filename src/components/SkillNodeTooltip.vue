@@ -20,10 +20,10 @@ defineProps<SkillNodeTooltipProps>()
     v-if="visible"
     class="
       fixed
-      z-[100]
+      z-100
       pointer-events-none
 
-      min-w-[220px]
+      min-w-55
       max-w-[320px]
 
       px-4
@@ -36,6 +36,7 @@ defineProps<SkillNodeTooltipProps>()
       shadow-xl
 
       text-slate-100
+      select-none
     "
     :style="{
       left: `${x}px`,
@@ -63,13 +64,14 @@ defineProps<SkillNodeTooltipProps>()
         text-slate-300
         mb-3
         whitespace-pre-line
+        select-none
       "
     >
       {{ description || 'No Skill Description Yet' }}
     </div>
 
     <!-- 分隔線 -->
-    <div class="border-t border-slate-700 mb-2" />
+    <div class="border-t border-slate-700 mb-2 select-none" />
 
     <!-- 技能資訊 -->
     <div
@@ -79,23 +81,24 @@ defineProps<SkillNodeTooltipProps>()
         justify-between
         gap-4
         text-xs
+        select-none
       "
     >
 
       <!-- 技能點 -->
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1 select-none">
         <span class="text-slate-400">
           Skill Point
         </span>
 
-        <span class="font-bold text-amber-400">
+        <span class="font-bold text-amber-400 select-none">
           {{ costPerLevel ?? 0 }}
         </span>
       </div>
 
       <!-- Level -->
-      <div class="flex items-center gap-1">
-        <span class="text-slate-400">
+      <div class="flex items-center gap-1 select-none">
+        <span class="text-slate-400 select-none">
           Level
         </span>
 

@@ -1,7 +1,10 @@
 import { useVueFlow, type GraphEdge, type GraphNode } from '@vue-flow/core'
-import type { SkillGraphNode } from '../type/SkillNode'
+import type { SkillGraphNode, SkillNodeData } from '../type/SkillNode'
+import type { ImportTSVDataSettings } from '@/type/ImportTSVSettings'
 
-interface SkillGameNode {
+
+type SkillNodeSaveData  = {
+  //Node stype , ID...原本就在Node中的資訊
   id: string
 
   position: {
@@ -12,14 +15,12 @@ interface SkillGameNode {
   width?: number
   height?: number
 
-  label?: string
-  description?: string
 
-  maxLevel?: number
-  costPerLevel?: number
+  //SkillNodeData
 
+  //after processing
   prerequisites: string[]
-}
+} & SkillNodeData
 
 export function useSkillTreeIO() {
   const {
@@ -66,12 +67,69 @@ export function useSkillTreeIO() {
 
   const importFromJson = (
     data: {
-      nodes: GraphNode<SkillGraphNode>[]
+      nodes: SkillGraphNode[]
       edges: GraphEdge[]
     }
   ) => {
     setNodes(data.nodes)
     setEdges(data.edges)
+  }
+
+
+  function importTSVData(
+    data : ImportTSVDataSettings
+  ){
+
+    const nodes : GraphNode<SkillNodeData>[] = getNodes.value;
+    const rows = data.data
+    // awful O(n^2) code
+    const max_len = Object.entries(rows[0]).length
+    console.log("max_len : " , max_len)
+    console.log(Object.entries(rows[0]))
+    for(const n of nodes){
+      for(const r of rows){
+        if(n.data.skill_id != undefined && n.data.skill_id == r[0]){
+          console.log(r)
+          if(data.column_number_skill_name >= 0){
+            n.data.label = r[data.column_number_skill_name - 1];
+          }
+
+          if(data.column_number_skill_description >= 0){
+            n.data.description = r[data.column_number_skill_description - 1];
+          }
+
+          if(data.column_number_skill_cost_per_level >= 0){
+            n.data.description = r[data.column_number_skill_cost_per_level - 1];
+          }
+
+          if(data.column_number_skill_max_level >= 0){
+            n.data.description = r[data.column_number_skill_max_level - 1];
+          }
+
+          if(data.column_number_skill_kvs_start >= 0){
+            n.data.kvs = []
+            const start_idx = data.column_number_skill_kvs_start - 1;
+            for(let i = start_idx ; i < max_len ; i++){
+              const str = r[i]
+              //console.log("[UseSkillTreeIO] str : " , str)
+              if(str.trim() == ''){continue}
+              //沒有冒號的情況，kv同等
+              if(str.includes(":")){
+                const splited = str.split(':');
+                const k = splited[0];
+                const v = splited[1];
+                
+                n.data.kvs.push({key : k , value : v})
+
+              }else{
+                n.data.kvs.push({key : str , value : ""})
+              }
+            }
+          }
+          
+        }
+      }
+    }
   }
 
   // ============================================================
@@ -176,7 +234,7 @@ const buildRequirements = (
 
   const exportGameData = () => {
 
-    const nodes = getNodes.value
+    const nodes = getNodes.value as GraphNode<SkillNodeSaveData>[]
     const edges = getEdges.value
 
     // ----------------------------------------------------------
@@ -192,8 +250,8 @@ const buildRequirements = (
     // ----------------------------------------------------------
     // 建立遊戲 Node
     // ----------------------------------------------------------
-
-    const gameNodes: SkillGameNode[] =
+      
+    const gameNodes: SkillNodeSaveData[] =
       nodes.map(node => {
 
         const nodePrerequisites =
@@ -202,6 +260,7 @@ const buildRequirements = (
         return {
 
           id: node.id,
+          skill_id: node.data.skill_id,
 
           position: {
             x: node.position.x,
@@ -228,6 +287,8 @@ const buildRequirements = (
 
           prerequisites:
             nodePrerequisites,
+
+          kvs : node.data.kvs
         }
       })
 
@@ -272,7 +333,6 @@ const buildRequirements = (
       `skill-tree-game-${Date.now()}.json`
 
     a.click()
-
     URL.revokeObjectURL(url)
   }
 
@@ -280,5 +340,7 @@ const buildRequirements = (
     exportToJson,
     importFromJson,
     exportGameData,
+
+    importTSVData
   }
 }
