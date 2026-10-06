@@ -1,4 +1,4 @@
-import { MarkerType, Position, useVueFlow, type XYPosition } from '@vue-flow/core'
+import { MarkerType, Position, useVueFlow} from '@vue-flow/core'
 import { cloneNode } from './useNodeClone'
 import type { SkillGraphNode } from '@/type/SkillNode'
 

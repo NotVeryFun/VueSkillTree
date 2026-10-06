@@ -13,7 +13,7 @@ import {
   snapPosition,
   topLeftToCenter,
 } from '../utils/grid'
-import type { SkillGraphNode, SkillNodeCustomProperty } from '../type/SkillNode'
+import type { SkillGraphNode } from '../type/SkillNode'
 import { makeDefaultNode } from '../data/SkillTree'
 import { cloneNode } from './useNodeClone'
 
