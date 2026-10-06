@@ -1,12 +1,12 @@
 
 <script setup lang="ts">
-    import type { GraphEdge, GraphNode } from '@vue-flow/core';
+    import type { GraphEdge } from '@vue-flow/core';
     
 
     import { type SkillGraphNode } from '../../type/SkillNode.ts'
     import { ref } from 'vue';
-import { Import, Upload } from 'lucide-vue-next';
-import Button from '../ui/button/Button.vue';
+    import { Import } from 'lucide-vue-next';
+    import Button from '../ui/button/Button.vue';
 
     const emits = defineEmits<{
         (e: 'import-data', data: { nodes: SkillGraphNode[]; edges: GraphEdge[] }): void
