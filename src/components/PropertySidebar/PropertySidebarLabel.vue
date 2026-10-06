@@ -48,7 +48,7 @@ import Input from '../ui/input/Input.vue';
           @update:model-value="
             (v) => updateProperty(
               'label',
-              v == 'string' ? v : ''
+              typeof(v) == 'string' ? v : ''
             )
           "
         />

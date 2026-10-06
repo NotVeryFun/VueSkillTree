@@ -54,7 +54,7 @@ import Input from '../ui/input/Input.vue';
         </label>
 
         <Input
-          :value="nodes.length === 1 ? nodes[0].data.skill_id : ''"
+          :model-value="nodes.length === 1 ? nodes[0].data.skill_id : ''"
           type="text"
           :disabled="nodes.length !== 1"
           :placeholder="

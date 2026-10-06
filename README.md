@@ -1,6 +1,9 @@
 # VueSkillTree
-This tool is made to design a skillTree for games.
-[Try it online](https://notveryfun.github.io/VueSkillTree/)
+This tool is made to design a skill Tree for games.
+
+# Usage
+[Use it online](https://notveryfun.github.io/VueSkillTree/)
+Or clone the repo and 
 
 Credit
 

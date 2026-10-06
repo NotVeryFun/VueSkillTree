@@ -15,6 +15,7 @@ import {
 } from '../utils/grid'
 import type { SkillGraphNode, SkillNodeCustomProperty } from '../type/SkillNode'
 import { makeDefaultNode } from '../data/SkillTree'
+import { cloneNode } from './useNodeClone'
 
 export function useSkillTreeActions(
   onBeforeChange?: () => void
@@ -87,7 +88,7 @@ export function useSkillTreeActions(
     position: 'top' | 'bottom' | 'left' | 'right'
   }) => {
 
-    const sourceNode = findNode(sourceId)
+    const sourceNode = findNode(sourceId) as SkillGraphNode
 
     if (!sourceNode) {
       return
@@ -128,23 +129,7 @@ export function useSkillTreeActions(
 
 
     onBeforeChange?.()
-    const id = createNodeId()
-    
-
-    const newNode = {
-        ...sourceNode,
-        id:id,
-        position:snappedTopLeft,
-        data:{
-          ...sourceNode.data,
-          skill_id : id,
-          kvs : sourceNode.data.kvs.map((kv : SkillNodeCustomProperty) => {kv})
-
-
-        }
-        
-        
-    } as SkillGraphNode;
+    const newNode = cloneNode(sourceNode , snappedTopLeft)
     addNodes([
       newNode
     ])
@@ -152,10 +137,10 @@ export function useSkillTreeActions(
 
     addEdges([
       {
-        id: createEdgeId(sourceId, id),
+        id: createEdgeId(sourceId, newNode.id),
 
         source: sourceId,
-        target: id,
+        target: newNode.id,
 
         type: 'floating',
 

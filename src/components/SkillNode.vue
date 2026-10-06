@@ -341,7 +341,7 @@ const shapeClass = computed(() => {
 
             flex
 
-            bg-slate-950/60
+            bg-amber-800/60
             border
             border-slate-300/60
             rounded-full
@@ -357,6 +357,7 @@ const shapeClass = computed(() => {
               font-mono
               font-bold
               text-slate-100
+             
               leading-none
               tracking-tight
               whitespace-nowrap

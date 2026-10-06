@@ -1,4 +1,6 @@
-import { MarkerType, Position, useVueFlow } from '@vue-flow/core'
+import { MarkerType, Position, useVueFlow, type XYPosition } from '@vue-flow/core'
+import { cloneNode } from './useNodeClone'
+import type { SkillGraphNode } from '@/type/SkillNode'
 
 export function useSkillConnection(
   onBeforeAddEdge?: () => void
@@ -11,6 +13,11 @@ export function useSkillConnection(
     endConnection,
     getIntersectingNodes,
     screenToFlowCoordinate,
+    getConnectedEdges,
+    findNode,
+    
+    removeSelectedNodes,
+    addNodes
   } = useVueFlow()
 
 
@@ -18,7 +25,6 @@ export function useSkillConnection(
   let connectionSourceId: string | null = null
   //let connectionPointerId: number | null = null
   let connectionTargetId: string | null = null
-
   const getNodeUnderPointer = (event: PointerEvent) => {
     const flowPosition = screenToFlowCoordinate({
       x: event.clientX,
@@ -45,6 +51,7 @@ export function useSkillConnection(
       y: event.clientY,
     })
 
+
     if (!targetId || targetId === connectionSourceId) {
       connectionTargetId = null
       return
@@ -64,7 +71,7 @@ export function useSkillConnection(
     connectionTargetId = null
   }
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e : PointerEvent) => {
     const sourceId = connectionSourceId
     const targetId = connectionTargetId
 
@@ -74,13 +81,47 @@ export function useSkillConnection(
 
     }
 
+    
+
     cleanup()
 
-    if (!sourceId || !targetId) return
+    if (!sourceId) return
+
+    if(!targetId){
+      const sourceNode = findNode(sourceId) as SkillGraphNode
+      if(sourceNode.width == undefined || sourceNode.height == undefined){return} //type check
+      const coords = screenToFlowCoordinate({
+        x : e.clientX - (sourceNode.width as number) / 2, 
+        y : e.clientY - (sourceNode.height as number) / 2})
+      const new_node = cloneNode(sourceNode , coords)
+      removeSelectedNodes([sourceNode])
+      addNodes([new_node])
+      return
+    }
+
     if (sourceId === targetId) return
+
+    const edges_target = getConnectedEdges(targetId)
+    const edges_source = getConnectedEdges(sourceId)
+
+
+
+    //console.log(edges_source.find(es => edges_target.find(et => et.id == es.id)))
+    if(edges_source.find(es => edges_target.find(et => et.id == es.id)) != undefined){
+      console.log("[Connect] Connection Found!")
+      return;
+    }
+    console.log("[Connect] Connection Not Found!")
+
+    console.log(sourceId)
+    console.log(edges_source)
+    console.log(targetId)
+    console.log(edges_target)
 
 
     onBeforeAddEdge?.();
+
+
     addEdges([
       {
         id: `e-${sourceId}-${targetId}-${Date.now()}`,
