@@ -90,10 +90,12 @@ export function useSkillConnection(
     if(!targetId){
       const sourceNode = findNode(sourceId) as SkillGraphNode
       if(sourceNode.width == undefined || sourceNode.height == undefined){return} //type check
+      onBeforeAddEdge?.()
       const coords = screenToFlowCoordinate({
         x : e.clientX - (sourceNode.width as number) / 2, 
         y : e.clientY - (sourceNode.height as number) / 2})
       const new_node = cloneNode(sourceNode , coords)
+      
       removeSelectedNodes([sourceNode])
       addNodes([new_node])
       return

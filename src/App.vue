@@ -475,6 +475,19 @@ const sidebarOpen = computed(() => {
       >
 
         <div class="text-[10px]">
+          Shift + D duplicate
+        </div>
+        <div class="text-[10px]">
+          Ctrl + Z Undo
+        </div>
+        <div class="text-[10px]">
+          Ctrl + Shift + Z Redo
+        </div>
+        <div class="text-[8px]">
+          *Undo and redo only works on node operation
+        </div>
+        <div class="text-[10px]">
+          
           v0.2.0 alpha
         </div>
       </div>
