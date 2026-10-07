@@ -40,8 +40,9 @@ Since the editor runs entirely in the browser, it can also be used offline after
 
 # Credit
 ## Skill Icons
-Skill icons are from Free Icons.
+Skill icons are from
 
+https://nieobie.itch.io/free-icons
 ## UI Icons
 
 Web UI icons are provided by Lucide.
