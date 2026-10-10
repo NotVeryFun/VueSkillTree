@@ -147,21 +147,21 @@ export function useSkillTreeIO() {
   // ============================================================
 
 const buildRequirements = (
-  nodes: GraphNode[],
+  nodes: SkillGraphNode[],
   edges: GraphEdge[],
 ) => {
   const nodeMap = new Map(nodes.map(node => [node.id, node]))
   const indegree = new Map<string, number>()
   const requirements = new Map<string, string[]>()
-  
+  const NodeIdToSkillId = new Map(nodes.map(node => [node.id, node.data.skill_id]))
   // ⭐️ 建立鄰接表 (source -> targets)，優化 Kahn 演算法效率至 O(V + E)
   const adjList = new Map<string, string[]>()
 
   // 初始化
   for (const node of nodes) {
-    indegree.set(node.id, 0)
-    requirements.set(node.id, [])
-    adjList.set(node.id, [])
+    indegree.set(node.data.skill_id, 0)
+    requirements.set(node.data.skill_id, [])
+    adjList.set(node.data.skill_id, [])
   }
 
   // 建立 dependency 與 adjList
@@ -169,13 +169,16 @@ const buildRequirements = (
     if (!nodeMap.has(edge.source) || !nodeMap.has(edge.target)) {
       throw new Error(`Edge ${edge.id} 指向不存在的 Node`)
     }
+    const edge_target_skillId = NodeIdToSkillId.get(edge.target);
+    const edge_source_skillId = NodeIdToSkillId.get(edge.source);
 
-    requirements.get(edge.target)!.push(edge.source)
-    adjList.get(edge.source)!.push(edge.target)
+    if(edge_target_skillId == undefined || edge_source_skillId == undefined){return;}
+    requirements.get(edge_target_skillId)!.push(edge_source_skillId)
+    adjList.get(edge_source_skillId)!.push(edge_target_skillId)
 
     indegree.set(
-      edge.target,
-      indegree.get(edge.target)! + 1
+      edge_target_skillId,
+      indegree.get(edge_target_skillId)! + 1
     )
   }
 
@@ -183,7 +186,7 @@ const buildRequirements = (
   // Kahn BFS
   // ============================================================
 
-  const queue: string[] = []
+  const queue: string[] = [] // skillId
 
   for (const [nodeId, degree] of indegree) {
     if (degree === 0) {
@@ -191,7 +194,7 @@ const buildRequirements = (
     }
   }
 
-  const visited = new Set<string>()
+  const visited = new Set<string>() // skillId
   let index = 0
 
   while (index < queue.length) {
@@ -216,7 +219,7 @@ const buildRequirements = (
 
   if (visited.size !== nodes.length) {
     const cycleNodes = nodes
-      .filter(node => !visited.has(node.id))
+      .filter(node => !visited.has(node.data.skill_id))
       .map(node => node.id)
     
     // ⭐️ 修正訊息呈現：避免使用 ' -> ' 讓使用者誤解為依賴順序
