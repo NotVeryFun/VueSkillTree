@@ -172,7 +172,7 @@ const buildRequirements = (
     const edge_target_skillId = NodeIdToSkillId.get(edge.target);
     const edge_source_skillId = NodeIdToSkillId.get(edge.source);
 
-    if(edge_target_skillId == undefined || edge_source_skillId == undefined){return;}
+    if(edge_target_skillId == undefined || edge_source_skillId == undefined){throw new Error(`Edge Target : ${edge_target_skillId} , Source ${edge_source_skillId} 發生錯誤`) ;}
     requirements.get(edge_target_skillId)!.push(edge_source_skillId)
     adjList.get(edge_source_skillId)!.push(edge_target_skillId)
 
