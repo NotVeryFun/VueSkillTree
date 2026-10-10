@@ -212,6 +212,12 @@ const buildRequirements = (
       }
     }
   }
+  console.table(
+    Array.from(requirements, ([skillId, requiredSkills]) => ({
+      skillId,
+      requirements: requiredSkills.join(", "),
+    }))
+  )
 
   // ============================================================
   // Cycle detection
@@ -220,7 +226,7 @@ const buildRequirements = (
   if (visited.size !== nodes.length) {
     const cycleNodes = nodes
       .filter(node => !visited.has(node.data.skill_id))
-      .map(node => node.id)
+      .map(node => node.data.skill_id)
     
     // ⭐️ 修正訊息呈現：避免使用 ' -> ' 讓使用者誤解為依賴順序
     const errorMsg = `技能樹存在循環依賴，以下節點無法解析：\n\n${cycleNodes.join(', ')}`
@@ -258,7 +264,7 @@ const buildRequirements = (
       nodes.map(node => {
 
         const nodePrerequisites =
-          prerequisites.get(node.id) ?? []
+          prerequisites.get(node.data.skill_id) ?? []
 
         return {
 
@@ -301,7 +307,7 @@ const buildRequirements = (
 
     const exportData = {
 
-      version: 1,
+      version: 2,
 
       nodes: gameNodes,
 
